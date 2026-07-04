@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Payroll</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .toast { transition: opacity 0.3s; }
+        .payroll-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 24px;
+            color: white;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .payroll-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);
+        }
+        .stat-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        .stat-card .label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        .stat-card .icon {
+            font-size: 24px;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-row .label {
+            color: #6b7280;
+            font-weight: 500;
+        }
+        .detail-row .value {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        .detail-row .value.positive { color: #10b981; }
+        .detail-row .value.negative { color: #ef4444; }
+        .status-badge {
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        .status-paid { background: #dcfce7; color: #166534; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-processing { background: #dbeafe; color: #1e40af; }
+        .status-failed { background: #fee2e2; color: #991b1b; }
+        .month-nav-btn {
+            padding: 6px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .month-nav-btn:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+        .month-nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .tab-btn {
+            padding: 8px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 500;
+            color: #6b7280;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        .tab-btn:hover {
+            color: #4f46e5;
+            background: #eef2ff;
+        }
+        .tab-btn.active {
+            color: #4f46e5;
+            border-bottom-color: #4f46e5;
+            background: #eef2ff;
+        }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        thead {
+            background: #f9fafb;
+        }
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+            white-space: nowrap;
+        }
+        td {
+            padding: 10px 16px;
+            border-bottom: 1px solid #f3f4f6;
+            vertical-align: middle;
+        }
+        tr:hover {
+            background: #f9fafb;
+        }
+        .download-btn {
+            background: #4f46e5;
+            color: white;
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        .download-btn:hover {
+            background: #4338ca;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+        }
+        .print-btn {
+            background: #6b7280;
+            color: white;
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        .print-btn:hover {
+            background: #4b5563;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .payroll-card { background: #4f46e5 !important; }
+            body { background: white; }
+            .stat-card { box-shadow: none !important; border: 1px solid #e5e7eb; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans antialiased">
+
+    <!-- ===== TOAST ===== -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="bg-white shadow px-4 py-3 flex items-center justify-between sticky top-0 z-40 no-print">
+        <div class="flex items-center gap-4">
+            <a href="dashboard.html" class="text-xl font-bold text-blue-700 hover:text-blue-800">← HRMS</a>
+            <span class="text-sm bg-gray-200 px-3 py-1 rounded-full">Payroll</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <span id="userName" class="text-sm font-medium"></span>
+            <button onclick="logout()" class="text-sm bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200 no-print">Logout</button>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto p-6">
+
+        <!-- ===== PAGE HEADER ===== -->
+        <div class="mb-6 flex flex-wrap justify-between items-center no-print">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">💰 My Payroll</h1>
+                <p class="text-gray-500">View your salary details and payment history</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="refreshPayroll()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg transition text-sm">
+                    🔄 Refresh
+                </button>
+                <button onclick="window.print()" class="print-btn">
+                    🖨️ Print
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== MONTH SELECTOR ===== -->
+        <div class="bg-white p-4 rounded-xl shadow mb-6 no-print">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <button onclick="changeMonth(-1)" class="month-nav-btn">←</button>
+                    <span class="text-lg font-semibold min-w-[140px] text-center" id="monthDisplay">January 2026</span>
+                    <button onclick="changeMonth(1)" class="month-nav-btn">→</button>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="goToCurrentMonth()" class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg transition text-sm">Current Month</button>
+                    <button onclick="loadPayroll()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition text-sm">View</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== PAYROLL SUMMARY CARD ===== -->
+        <div class="payroll-card mb-6" id="payrollSummaryCard">
+            <div class="flex flex-wrap justify-between items-start">
+                <div>
+                    <p class="text-white/80 text-sm">Net Salary for <span id="payrollMonthYear">Current Month</span></p>
+                    <p class="text-4xl font-bold mt-1" id="netSalary">$0.00</p>
+                    <p class="text-white/60 text-sm mt-1" id="payrollStatus">Status: <span class="text-white font-medium">—</span></p>
+                </div>
+                <div class="bg-white/20 rounded-full p-4">
+                    <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-4 grid grid-cols-3 gap-4">
+                <div class="bg-white/10 rounded-lg p-3 text-center">
+                    <p class="text-xs text-white/80">Basic</p>
+                    <p class="font-semibold text-white" id="summaryBasic">$0</p>
+                </div>
+                <div class="bg-white/10 rounded-lg p-3 text-center">
+                    <p class="text-xs text-white/80">Allowance</p>
+                    <p class="font-semibold text-white" id="summaryAllowance">$0</p>
+                </div>
+                <div class="bg-white/10 rounded-lg p-3 text-center">
+                    <p class="text-xs text-white/80">Deduction</p>
+                    <p class="font-semibold text-white" id="summaryDeduction">$0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== STATISTICS CARDS ===== -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="stat-card flex items-center gap-4">
+                <div class="icon">💰</div>
+                <div>
+                    <div class="number" id="statBasic">$0</div>
+                    <div class="label">Basic Salary</div>
+                </div>
+            </div>
+            <div class="stat-card flex items-center gap-4">
+                <div class="icon">📈</div>
+                <div>
+                    <div class="number" id="statAllowance">$0</div>
+                    <div class="label">Total Allowances</div>
+                </div>
+            </div>
+            <div class="stat-card flex items-center gap-4">
+                <div class="icon">📉</div>
+                <div>
+                    <div class="number" id="statDeduction">$0</div>
+                    <div class="label">Total Deductions</div>
+                </div>
+            </div>
+            <div class="stat-card flex items-center gap-4">
+                <div class="icon">⭐</div>
+                <div>
+                    <div class="number" id="statNet">$0</div>
+                    <div class="label">Net Salary</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TABS ===== -->
+        <div class="bg-white rounded-xl shadow overflow-hidden mb-6 no-print">
+            <div class="border-b border-gray-200 flex flex-wrap">
+                <button class="tab-btn active" data-tab="details" onclick="switchTab('details')">📊 Details</button>
+                <button class="tab-btn" data-tab="history" onclick="switchTab('history')">📋 History</button>
+            </div>
+        </div>
+
+        <!-- ===== TAB: DETAILS ===== -->
+        <div id="tab-details" class="tab-content active">
+            <div class="bg-white rounded-xl shadow overflow-hidden">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">📊 Salary Breakdown</h3>
+                    <div id="payrollDetails">
+                        <div class="detail-row">
+                            <span class="label">Employee ID</span>
+                            <span class="value" id="detailEmpId">—</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Employee Name</span>
+                            <span class="value" id="detailName">—</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Department</span>
+                            <span class="value" id="detailDept">—</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Designation</span>
+                            <span class="value" id="detailDesignation">—</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Basic Salary</span>
+                            <span class="value" id="detailBasic">$0</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">House Rent Allowance (HRA)</span>
+                            <span class="value positive" id="detailHRA">$0</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Medical Allowance</span>
+                            <span class="value positive" id="detailMedical">$0</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Transport Allowance</span>
+                            <span class="value positive" id="detailTransport">$0</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Other Allowances</span>
+                            <span class="value positive" id="detailOtherAllowance">$0</span>
+                        </div>
+                        <div class="detail-row" style="background: #f0fdf4; border-radius: 8px; margin: 8px 0; padding: 12px 10px;">
+                            <span class="label font-semibold">Total Allowances</span>
+                            <span class="value positive font-bold" id="detailTotalAllowance">$0</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Tax Deduction</span>
+                            <span class="value negative" id="detailTax">$0</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Provident Fund</span>
+                            <span class="value negative" id="detailPF">$0</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Health Insurance</span>
+                            <span class="value negative" id="detailInsurance">$0</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Other Deductions</span>
+                            <span class="value negative" id="detailOtherDeduction">$0</span>
+                        </div>
+                        <div class="detail-row" style="background: #fef2f2; border-radius: 8px; margin: 8px 0; padding: 12px 10px;">
+                            <span class="label font-semibold">Total Deductions</span>
+                            <span class="value negative font-bold" id="detailTotalDeduction">$0</span>
+                        </div>
+                        <div class="detail-row" style="background: #eef2ff; border-radius: 8px; margin: 12px 0 0 0; padding: 16px 10px;">
+                            <span class="label font-bold text-lg">Net Salary</span>
+                            <span class="value font-bold text-lg text-blue-600" id="detailNet">$0</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm text-gray-500">
+                        <span>Payment Date: <strong id="detailPayDate">—</strong></span>
+                        <span class="ml-4">Method: <strong id="detailPayMethod">—</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TAB: HISTORY ===== -->
+        <div id="tab-history" class="tab-content">
+            <div class="bg-white rounded-xl shadow overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-gray-800">📋 Payroll History</h3>
+                    <span class="text-sm text-gray-500" id="historyCount">Showing 0 records</span>
+                </div>
+                <div class="table-container" style="border: none;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Month</th>
+                                <th>Year</th>
+                                <th>Basic</th>
+                                <th>Allowance</th>
+                                <th>Deduction</th>
+                                <th>Net Salary</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyBody">
+                            <tr>
+                                <td colspan="7" class="text-center py-8 text-gray-500">No payroll history found</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== EMPTY STATE (no payroll) ===== -->
+        <div id="noPayrollMessage" class="hidden text-center py-12 bg-white rounded-xl shadow">
+            <div class="text-6xl mb-4">📭</div>
+            <h3 class="text-xl font-semibold text-gray-600">No Payroll Record Found</h3>
+            <p class="text-gray-400">No payroll has been generated for the selected month.</p>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  CONFIGURATION
+        // ============================================================
+        const API_BASE = '../../backend/api/';
+        let currentUser = null;
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        let payrollData = null;
+        let allPayrollHistory = [];
+
+        // ============================================================
+        //  TOAST
+        // ============================================================
+        function showToast(msg, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast px-6 py-3 rounded shadow-lg text-white ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
+            toast.textContent = msg;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+
+        // ============================================================
+        //  API HELPER
+        // ============================================================
+        async function apiFetch(endpoint, options = {}) {
+            const url = API_BASE + endpoint;
+            const response = await fetch(url, {
+                ...options,
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(options.headers || {})
+                },
+                body: options.body ? JSON.stringify(options.body) : undefined
+            });
+            let data;
+            try { data = await response.json(); } catch (e) { data = { error: 'Invalid response' }; }
+            if (!response.ok) {
+                throw new Error(data.message || data.error || `HTTP ${response.status}`);
+            }
+            return data;
+        }
+
+        // ============================================================
+        //  AUTH STATE
+        // ============================================================
+        async function loadSession() {
+            try {
+                const data = await apiFetch('auth.php?action=check');
+                if (data.success && data.data && data.data.user_id) {
+                    const userData = await apiFetch('employees.php?id=' + data.data.user_id);
+                    if (userData.success) {
+                        currentUser = userData.data;
+                        document.getElementById('userName').textContent = currentUser.name;
+                        return true;
+                    }
+                }
+            } catch (e) {}
+            return false;
+        }
+
+        // ============================================================
+        //  LOGOUT
+        // ============================================================
+        async function logout() {
+            try {
+                await apiFetch('auth.php?action=logout');
+            } catch (e) {}
+            window.location.href = '../login.html';
+        }
+
+        // ============================================================
+        //  PAYROLL FUNCTIONS
+        // ============================================================
+
+        // Load payroll data
+        async function loadPayroll() {
+            const month = currentMonth + 1;
+            const year = currentYear;
+
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'];
+            document.getElementById('monthDisplay').textContent = `${monthNames[currentMonth]} ${year}`;
+            document.getElementById('payrollMonthYear').textContent = `${monthNames[currentMonth]} ${year}`;
+
+            try {
+                const resp = await apiFetch(`payroll.php?month=${month}&year=${year}`);
+                if (resp.success && resp.data) {
+                    payrollData = resp.data;
+                    document.getElementById('noPayrollMessage').classList.add('hidden');
+                    displayPayroll(payrollData);
+                } else {
+                    // No payroll found
+                    payrollData = null;
+                    document.getElementById('noPayrollMessage').classList.remove('hidden');
+                    clearPayrollDisplay();
+                    showToast('No payroll record found for this month', 'error');
+                }
+
+                // Load history
+                await loadPayrollHistory();
+
+            } catch (err) {
+                showToast('Failed to load payroll: ' + err.message, 'error');
+                clearPayrollDisplay();
+            }
+        }
+
+        // Display payroll data
+        function displayPayroll(payroll) {
+            const net = (payroll.basic || 0) + (payroll.allowance || 0) - (payroll.deduction || 0);
+            const status = payroll.payment_status || 'Pending';
+            const statusClass = {
+                'Paid': 'status-paid',
+                'Pending': 'status-pending',
+                'Processing': 'status-processing',
+                'Failed': 'status-failed'
+            }[status] || 'status-pending';
+
+            // Summary card
+            document.getElementById('netSalary').textContent = '$' + formatNumber(net);
+            document.getElementById('summaryBasic').textContent = '$' + formatNumber(payroll.basic || 0);
+            document.getElementById('summaryAllowance').textContent = '$' + formatNumber(payroll.allowance || 0);
+            document.getElementById('summaryDeduction').textContent = '$' + formatNumber(payroll.deduction || 0);
+            document.getElementById('payrollStatus').innerHTML = `Status: <span class="text-white font-medium status-badge ${statusClass}">${status}</span>`;
+
+            // Stats cards
+            document.getElementById('statBasic').textContent = '$' + formatNumber(payroll.basic || 0);
+            document.getElementById('statAllowance').textContent = '$' + formatNumber(payroll.allowance || 0);
+            document.getElementById('statDeduction').textContent = '$' + formatNumber(payroll.deduction || 0);
+            document.getElementById('statNet').textContent = '$' + formatNumber(net);
+
+            // Details tab
+            document.getElementById('detailEmpId').textContent = currentUser.employee_id || '—';
+            document.getElementById('detailName').textContent = currentUser.name || '—';
+            document.getElementById('detailDept').textContent = currentUser.department || '—';
+            document.getElementById('detailDesignation').textContent = currentUser.designation || '—';
+            document.getElementById('detailBasic').textContent = '$' + formatNumber(payroll.basic || 0);
+
+            // Allowance breakdown (if more detailed data available)
+            const allowanceDetails = payroll.allowance_details || {
+                hra: Math.round((payroll.allowance || 0) * 0.4),
+                medical: Math.round((payroll.allowance || 0) * 0.3),
+                transport: Math.round((payroll.allowance || 0) * 0.2),
+                other: Math.round((payroll.allowance || 0) * 0.1)
+            };
+
+            document.getElementById('detailHRA').textContent = '$' + formatNumber(allowanceDetails.hra || 0);
+            document.getElementById('detailMedical').textContent = '$' + formatNumber(allowanceDetails.medical || 0);
+            document.getElementById('detailTransport').textContent = '$' + formatNumber(allowanceDetails.transport || 0);
+            document.getElementById('detailOtherAllowance').textContent = '$' + formatNumber(allowanceDetails.other || 0);
+            document.getElementById('detailTotalAllowance').textContent = '$' + formatNumber(payroll.allowance || 0);
+
+            // Deduction breakdown
+            const deductionDetails = payroll.deduction_details || {
+                tax: Math.round((payroll.deduction || 0) * 0.5),
+                pf: Math.round((payroll.deduction || 0) * 0.3),
+                insurance: Math.round((payroll.deduction || 0) * 0.15),
+                other: Math.round((payroll.deduction || 0) * 0.05)
+            };
+
+            document.getElementById('detailTax').textContent = '$' + formatNumber(deductionDetails.tax || 0);
+            document.getElementById('detailPF').textContent = '$' + formatNumber(deductionDetails.pf || 0);
+            document.getElementById('detailInsurance').textContent = '$' + formatNumber(deductionDetails.insurance || 0);
+            document.getElementById('detailOtherDeduction').textContent = '$' + formatNumber(deductionDetails.other || 0);
+            document.getElementById('detailTotalDeduction').textContent = '$' + formatNumber(payroll.deduction || 0);
+            document.getElementById('detailNet').textContent = '$' + formatNumber(net);
+
+            // Additional details
+            document.getElementById('detailPayDate').textContent = payroll.pay_date || '—';
+            document.getElementById('detailPayMethod').textContent = payroll.payment_method || 'Bank Transfer';
+        }
+
+        // Clear payroll display
+        function clearPayrollDisplay() {
+            document.getElementById('netSalary').textContent = '$0.00';
+            document.getElementById('summaryBasic').textContent = '$0';
+            document.getElementById('summaryAllowance').textContent = '$0';
+            document.getElementById('summaryDeduction').textContent = '$0';
+            document.getElementById('payrollStatus').textContent = 'Status: —';
+
+            document.getElementById('statBasic').textContent = '$0';
+            document.getElementById('statAllowance').textContent = '$0';
+            document.getElementById('statDeduction').textContent = '$0';
+            document.getElementById('statNet').textContent = '$0';
+
+            document.getElementById('detailBasic').textContent = '$0';
+            document.getElementById('detailHRA').textContent = '$0';
+            document.getElementById('detailMedical').textContent = '$0';
+            document.getElementById('detailTransport').textContent = '$0';
+            document.getElementById('detailOtherAllowance').textContent = '$0';
+            document.getElementById('detailTotalAllowance').textContent = '$0';
+            document.getElementById('detailTax').textContent = '$0';
+            document.getElementById('detailPF').textContent = '$0';
+            document.getElementById('detailInsurance').textContent = '$0';
+            document.getElementById('detailOtherDeduction').textContent = '$0';
+            document.getElementById('detailTotalDeduction').textContent = '$0';
+            document.getElementById('detailNet').textContent = '$0';
+            document.getElementById('detailPayDate').textContent = '—';
+            document.getElementById('detailPayMethod').textContent = '—';
+        }
+
+        // Load payroll history
+        async function loadPayrollHistory() {
+            try {
+                // Fetch all months for the current year
+                const history = [];
+                for (let m = 1; m <= 12; m++) {
+                    try {
+                        const resp = await apiFetch(`payroll.php?month=${m}&year=${currentYear}`);
+                        if (resp.success && resp.data) {
+                            history.push({
+                                ...resp.data,
+                                month: m,
+                                year: currentYear,
+                                monthName: getMonthName(m)
+                            });
+                        }
+                    } catch (e) {
+                        // Month has no payroll, skip
+                    }
+                }
+
+                // Sort by month descending
+                history.sort((a, b) => b.month - a.month);
+                allPayrollHistory = history;
+
+                renderPayrollHistory(history);
+                document.getElementById('historyCount').textContent = `Showing ${history.length} records`;
+
+            } catch (err) {
+                document.getElementById('historyBody').innerHTML = `
+                    <tr><td colspan="7" class="text-center py-8 text-gray-500">Error loading history</td></tr>
+                `;
+            }
+        }
+
+        // Render payroll history
+        function renderPayrollHistory(history) {
+            const tbody = document.getElementById('historyBody');
+
+            if (history.length === 0) {
+                tbody.innerHTML = `
+                    <tr><td colspan="7" class="text-center py-8 text-gray-500">No payroll history found</td></tr>
+                `;
+                return;
+            }
+
+            const statusClass = {
+                'Paid': 'status-paid',
+                'Pending': 'status-pending',
+                'Processing': 'status-processing',
+                'Failed': 'status-failed'
+            };
+
+            tbody.innerHTML = history.map(p => {
+                const net = (p.basic || 0) + (p.allowance || 0) - (p.deduction || 0);
+                const status = p.payment_status || 'Paid';
+                const cls = statusClass[status] || 'status-paid';
+                return `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-6 py-3">${p.monthName}</td>
+                        <td class="px-6 py-3">${p.year}</td>
+                        <td class="px-6 py-3">$${formatNumber(p.basic || 0)}</td>
+                        <td class="px-6 py-3">$${formatNumber(p.allowance || 0)}</td>
+                        <td class="px-6 py-3">$${formatNumber(p.deduction || 0)}</td>
+                        <td class="px-6 py-3 font-semibold text-blue-600">$${formatNumber(net)}</td>
+                        <td class="px-6 py-3">
+                            <span class="status-badge ${cls}">${status}</span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // ============================================================
+        //  MONTH NAVIGATION
+        // ============================================================
+        function changeMonth(delta) {
+            currentMonth += delta;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            loadPayroll();
+        }
+
+        function goToCurrentMonth() {
+            const now = new Date();
+            currentMonth = now.getMonth();
+            currentYear = now.getFullYear();
+            loadPayroll();
+        }
+
+        function refreshPayroll() {
+            showToast('🔄 Refreshing payroll data...', 'info');
+            loadPayroll();
+        }
+
+        // ============================================================
+        //  TAB SWITCHING
+        // ============================================================
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+        }
+
+        // ============================================================
+        //  HELPERS
+        // ============================================================
+        function getMonthName(month) {
+            const names = ['January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'];
+            return names[month - 1] || month;
+        }
+
+        function formatNumber(num) {
+            return Number(num).toFixed(2);
+        }
+
+        // ============================================================
+        //  KEYBOARD SHORTCUTS
+        // ============================================================
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') {
+                changeMonth(-1);
+            }
+            if (e.key === 'ArrowRight') {
+                changeMonth(1);
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                e.preventDefault();
+                refreshPayroll();
+            }
+        });
+
+        // ============================================================
+        //  INIT
+        // ============================================================
+        (async function init() {
+            const ok = await loadSession();
+            if (!ok) {
+                window.location.href = '../login.html';
+                return;
+            }
+
+            await loadPayroll();
+            console.log('💰 Payroll page loaded for:', currentUser.name);
+            console.log(`📊 Month: ${currentMonth + 1}/${currentYear}`);
+        })();
+    </script>
+
+</body>
+</html>
