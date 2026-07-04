@@ -1,0 +1,475 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "generated_at": "2026-07-04T10:00:00Z",
+    "company": "HRMS Demo Company",
+    "total_users": 25
+  },
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "email": "admin@example.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "admin",
+      "permissions": ["all"],
+      "employee_id": "ADMIN",
+      "name": "Admin User",
+      "status": "active",
+      "last_login": "2026-07-04 09:30:00",
+      "created_at": "2020-01-01 00:00:00",
+      "updated_at": "2026-07-04 09:30:00"
+    },
+    {
+      "id": 2,
+      "username": "john.doe",
+      "email": "john.doe@company.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "employee",
+      "permissions": ["view_profile", "view_attendance", "apply_leave", "view_payroll"],
+      "employee_id": "EMP001",
+      "name": "John Doe",
+      "status": "active",
+      "last_login": "2026-07-04 08:45:00",
+      "created_at": "2020-06-15 09:00:00",
+      "updated_at": "2026-07-04 08:45:00"
+    },
+    {
+      "id": 3,
+      "username": "jane.smith",
+      "email": "jane.smith@company.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "employee",
+      "permissions": ["view_profile", "view_attendance", "apply_leave", "view_payroll"],
+      "employee_id": "EMP002",
+      "name": "Jane Smith",
+      "status": "active",
+      "last_login": "2026-07-03 17:00:00",
+      "created_at": "2019-08-01 09:00:00",
+      "updated_at": "2026-07-03 17:00:00"
+    },
+    {
+      "id": 4,
+      "username": "robert.johnson",
+      "email": "robert.johnson@company.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "employee",
+      "permissions": ["view_profile", "view_attendance", "apply_leave", "view_payroll"],
+      "employee_id": "EMP003",
+      "name": "Robert Johnson",
+      "status": "active",
+      "last_login": "2026-07-03 09:15:00",
+      "created_at": "2021-03-10 09:00:00",
+      "updated_at": "2026-07-03 09:15:00"
+    },
+    {
+      "id": 5,
+      "username": "maria.garcia",
+      "email": "maria.garcia@company.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "hr",
+      "permissions": ["view_profile", "view_attendance", "apply_leave", "view_payroll", "manage_employees", "approve_leave", "manage_payroll"],
+      "employee_id": "EMP004",
+      "name": "Maria Garcia",
+      "status": "active",
+      "last_login": "2026-07-04 08:00:00",
+      "created_at": "2020-02-20 09:00:00",
+      "updated_at": "2026-07-04 08:00:00"
+    },
+    {
+      "id": 6,
+      "username": "david.chen",
+      "email": "david.chen@company.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "employee",
+      "permissions": ["view_profile", "view_attendance", "apply_leave", "view_payroll"],
+      "employee_id": "EMP005",
+      "name": "David Chen",
+      "status": "active",
+      "last_login": "2026-07-03 16:30:00",
+      "created_at": "2019-10-01 09:00:00",
+      "updated_at": "2026-07-03 16:30:00"
+    },
+    {
+      "id": 7,
+      "username": "sarah.williams",
+      "email": "sarah.williams@company.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "employee",
+      "permissions": ["view_profile", "view_attendance", "apply_leave", "view_payroll"],
+      "employee_id": "EMP006",
+      "name": "Sarah Williams",
+      "status": "active",
+      "last_login": "2026-07-02 18:00:00",
+      "created_at": "2021-07-15 09:00:00",
+      "updated_at": "2026-07-02 18:00:00"
+    },
+    {
+      "id": 8,
+      "username": "michael.brown",
+      "email": "michael.brown@company.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "employee",
+      "permissions": ["view_profile", "view_attendance", "apply_leave", "view_payroll"],
+      "employee_id": "EMP007",
+      "name": "Michael Brown",
+      "status": "active",
+      "last_login": "2026-07-03 08:15:00",
+      "created_at": "2018-04-01 09:00:00",
+      "updated_at": "2026-07-03 08:15:00"
+    },
+    {
+      "id": 9,
+      "username": "emily.davis",
+      "email": "emily.davis@company.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "employee",
+      "permissions": ["view_profile", "view_attendance", "apply_leave", "view_payroll"],
+      "employee_id": "EMP008",
+      "name": "Emily Davis",
+      "status": "active",
+      "last_login": "2026-07-02 16:00:00",
+      "created_at": "2019-05-20 09:00:00",
+      "updated_at": "2026-07-02 16:00:00"
+    },
+    {
+      "id": 10,
+      "username": "james.wilson",
+      "email": "james.wilson@company.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "employee",
+      "permissions": ["view_profile", "view_attendance", "apply_leave", "view_payroll"],
+      "employee_id": "EMP009",
+      "name": "James Wilson",
+      "status": "active",
+      "last_login": "2026-07-03 14:30:00",
+      "created_at": "2020-09-10 09:00:00",
+      "updated_at": "2026-07-03 14:30:00"
+    },
+    {
+      "id": 11,
+      "username": "lisa.anderson",
+      "email": "lisa.anderson@company.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "employee",
+      "permissions": ["view_profile", "view_attendance", "apply_leave", "view_payroll"],
+      "employee_id": "EMP010",
+      "name": "Lisa Anderson",
+      "status": "active",
+      "last_login": "2026-07-04 07:45:00",
+      "created_at": "2020-11-15 09:00:00",
+      "updated_at": "2026-07-04 07:45:00"
+    },
+    {
+      "id": 12,
+      "username": "thomas.lee",
+      "email": "thomas.lee@company.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "employee",
+      "permissions": ["view_profile", "view_attendance", "apply_leave", "view_payroll"],
+      "employee_id": "EMP011",
+      "name": "Thomas Lee",
+      "status": "active",
+      "last_login": "2026-07-02 15:00:00",
+      "created_at": "2021-01-20 09:00:00",
+      "updated_at": "2026-07-02 15:00:00"
+    },
+    {
+      "id": 13,
+      "username": "patricia.martinez",
+      "email": "patricia.martinez@company.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "employee",
+      "permissions": ["view_profile", "view_attendance", "apply_leave", "view_payroll"],
+      "employee_id": "EMP012",
+      "name": "Patricia Martinez",
+      "status": "active",
+      "last_login": "2026-07-03 13:00:00",
+      "created_at": "2019-12-01 09:00:00",
+      "updated_at": "2026-07-03 13:00:00"
+    },
+    {
+      "id": 14,
+      "username": "daniel.thompson",
+      "email": "daniel.thompson@company.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "employee",
+      "permissions": ["view_profile", "view_attendance", "apply_leave", "view_payroll"],
+      "employee_id": "EMP013",
+      "name": "Daniel Thompson",
+      "status": "inactive",
+      "last_login": "2026-06-20 10:00:00",
+      "created_at": "2021-05-10 09:00:00",
+      "updated_at": "2026-06-20 10:00:00"
+    },
+    {
+      "id": 15,
+      "username": "stephanie.clark",
+      "email": "stephanie.clark@company.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "employee",
+      "permissions": ["view_profile", "view_attendance", "apply_leave", "view_payroll"],
+      "employee_id": "EMP014",
+      "name": "Stephanie Clark",
+      "status": "active",
+      "last_login": "2026-07-01 09:00:00",
+      "created_at": "2021-08-15 09:00:00",
+      "updated_at": "2026-07-01 09:00:00"
+    },
+    {
+      "id": 16,
+      "username": "christopher.young",
+      "email": "christopher.young@company.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "employee",
+      "permissions": ["view_profile", "view_attendance", "apply_leave", "view_payroll"],
+      "employee_id": "EMP015",
+      "name": "Christopher Young",
+      "status": "active",
+      "last_login": "2026-07-02 11:30:00",
+      "created_at": "2019-09-01 09:00:00",
+      "updated_at": "2026-07-02 11:30:00"
+    },
+    {
+      "id": 17,
+      "username": "michelle.robinson",
+      "email": "michelle.robinson@company.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "employee",
+      "permissions": ["view_profile", "view_attendance", "apply_leave", "view_payroll"],
+      "employee_id": "EMP016",
+      "name": "Michelle Robinson",
+      "status": "active",
+      "last_login": "2026-07-01 14:00:00",
+      "created_at": "2020-11-01 09:00:00",
+      "updated_at": "2026-07-01 14:00:00"
+    },
+    {
+      "id": 18,
+      "username": "kevin.hernandez",
+      "email": "kevin.hernandez@company.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "employee",
+      "permissions": ["view_profile", "view_attendance", "apply_leave", "view_payroll"],
+      "employee_id": "EMP017",
+      "name": "Kevin Hernandez",
+      "status": "active",
+      "last_login": "2026-07-03 15:45:00",
+      "created_at": "2020-04-15 09:00:00",
+      "updated_at": "2026-07-03 15:45:00"
+    },
+    {
+      "id": 19,
+      "username": "amanda.white",
+      "email": "amanda.white@company.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "employee",
+      "permissions": ["view_profile", "view_attendance", "apply_leave", "view_payroll"],
+      "employee_id": "EMP018",
+      "name": "Amanda White",
+      "status": "active",
+      "last_login": "2026-07-02 12:00:00",
+      "created_at": "2021-04-01 09:00:00",
+      "updated_at": "2026-07-02 12:00:00"
+    },
+    {
+      "id": 20,
+      "username": "jason.scott",
+      "email": "jason.scott@company.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "employee",
+      "permissions": ["view_profile", "view_attendance", "apply_leave", "view_payroll"],
+      "employee_id": "EMP019",
+      "name": "Jason Scott",
+      "status": "inactive",
+      "last_login": "2026-06-15 08:00:00",
+      "created_at": "2018-07-01 09:00:00",
+      "updated_at": "2026-06-15 08:00:00"
+    },
+    {
+      "id": 21,
+      "username": "angela.lewis",
+      "email": "angela.lewis@company.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "employee",
+      "permissions": ["view_profile", "view_attendance", "apply_leave", "view_payroll"],
+      "employee_id": "EMP020",
+      "name": "Angela Lewis",
+      "status": "active",
+      "last_login": "2026-07-03 08:30:00",
+      "created_at": "2021-06-15 09:00:00",
+      "updated_at": "2026-07-03 08:30:00"
+    },
+    {
+      "id": 22,
+      "username": "brian.turner",
+      "email": "brian.turner@company.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "employee",
+      "permissions": ["view_profile", "view_attendance", "apply_leave", "view_payroll"],
+      "employee_id": "EMP021",
+      "name": "Brian Turner",
+      "status": "active",
+      "last_login": "2026-07-01 16:45:00",
+      "created_at": "2019-03-01 09:00:00",
+      "updated_at": "2026-07-01 16:45:00"
+    },
+    {
+      "id": 23,
+      "username": "jessica.collins",
+      "email": "jessica.collins@company.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "employee",
+      "permissions": ["view_profile", "view_attendance", "apply_leave", "view_payroll"],
+      "employee_id": "EMP022",
+      "name": "Jessica Collins",
+      "status": "active",
+      "last_login": "2026-07-02 13:15:00",
+      "created_at": "2020-08-01 09:00:00",
+      "updated_at": "2026-07-02 13:15:00"
+    },
+    {
+      "id": 24,
+      "username": "mark.phillips",
+      "email": "mark.phillips@company.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "employee",
+      "permissions": ["view_profile", "view_attendance", "apply_leave", "view_payroll"],
+      "employee_id": "EMP023",
+      "name": "Mark Phillips",
+      "status": "active",
+      "last_login": "2026-07-04 06:30:00",
+      "created_at": "2019-06-01 09:00:00",
+      "updated_at": "2026-07-04 06:30:00"
+    },
+    {
+      "id": 25,
+      "username": "laura.mitchell",
+      "email": "laura.mitchell@company.com",
+      "password": "password",
+      "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "employee",
+      "permissions": ["view_profile", "view_attendance", "apply_leave", "view_payroll"],
+      "employee_id": "EMP024",
+      "name": "Laura Mitchell",
+      "status": "inactive",
+      "last_login": "2026-06-25 11:00:00",
+      "created_at": "2020-03-15 09:00:00",
+      "updated_at": "2026-06-25 11:00:00"
+    }
+  ],
+  "roles": {
+    "admin": {
+      "description": "Full system access",
+      "permissions": ["*"]
+    },
+    "hr": {
+      "description": "Human Resources access",
+      "permissions": [
+        "view_profile",
+        "view_attendance",
+        "apply_leave",
+        "view_payroll",
+        "manage_employees",
+        "approve_leave",
+        "manage_payroll",
+        "view_reports"
+      ]
+    },
+    "employee": {
+      "description": "Standard employee access",
+      "permissions": [
+        "view_profile",
+        "edit_own_profile",
+        "view_attendance",
+        "apply_leave",
+        "view_payroll"
+      ]
+    }
+  },
+  "permission_groups": {
+    "profile": {
+      "view_profile": "View personal profile",
+      "edit_own_profile": "Edit own profile",
+      "manage_employees": "Manage all employees"
+    },
+    "attendance": {
+      "view_attendance": "View attendance",
+      "mark_attendance": "Mark attendance",
+      "view_all_attendance": "View all attendance"
+    },
+    "leave": {
+      "apply_leave": "Apply for leave",
+      "approve_leave": "Approve leave requests",
+      "view_all_leaves": "View all leave requests"
+    },
+    "payroll": {
+      "view_payroll": "View payroll",
+      "manage_payroll": "Manage payroll"
+    },
+    "reports": {
+      "view_reports": "View reports"
+    }
+  },
+  "session_data": {
+    "active_sessions": [
+      {
+        "user_id": 1,
+        "session_id": "sess_abc123",
+        "ip_address": "192.168.1.100",
+        "user_agent": "Chrome 114.0.0.0",
+        "last_activity": "2026-07-04 09:30:00",
+        "created_at": "2026-07-04 08:00:00"
+      },
+      {
+        "user_id": 2,
+        "session_id": "sess_def456",
+        "ip_address": "192.168.1.101",
+        "user_agent": "Firefox 115.0.0.0",
+        "last_activity": "2026-07-04 08:45:00",
+        "created_at": "2026-07-04 07:30:00"
+      },
+      {
+        "user_id": 5,
+        "session_id": "sess_ghi789",
+        "ip_address": "192.168.1.102",
+        "user_agent": "Safari 16.5.0.0",
+        "last_activity": "2026-07-04 08:00:00",
+        "created_at": "2026-07-04 06:45:00"
+      }
+    ]
+  },
+  "password_reset_tokens": [
+    {
+      "user_id": 14,
+      "token": "reset_token_abc123",
+      "created_at": "2026-06-28 10:00:00",
+      "expires_at": "2026-06-28 16:00:00",
+      "used": false
+    }
+  ]
+}
