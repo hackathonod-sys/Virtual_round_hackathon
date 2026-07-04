@@ -1,168 +1,858 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Manage Announcements</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <style>
-        .timeline {
-            font-size: 0.9rem;
-            color: #6c757d;
+        /* ── Root ── */
+        :root {
+            --font-primary: 'Poppins', sans-serif;
+            --color-bg: #f1f5f9;
+            --color-surface: #ffffff;
+            --color-primary: #4f46e5;
+            --color-primary-dark: #4338ca;
+            --color-primary-light: #eef2ff;
+            --color-text: #1e293b;
+            --color-text-secondary: #64748b;
+            --color-text-muted: #94a3b8;
+            --color-border: #e2e8f0;
+            --color-border-light: #f1f5f9;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.12);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --transition-fast: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-smooth: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
+        /* ── Reset & Base ── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-bg);
+            color: var(--color-text);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Navbar ── */
+        .navbar-custom {
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: 0 1.5rem;
+            height: 68px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow var(--transition-smooth);
+        }
+        .navbar-custom.scrolled {
+            box-shadow: var(--shadow-md);
+        }
+        .navbar-brand-custom {
+            font-weight: 700;
+            font-size: 1.55rem;
+            letter-spacing: -0.02em;
+            color: var(--color-primary) !important;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            white-space: nowrap;
+        }
+        .navbar-brand-custom .brand-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border-radius: var(--radius-sm);
+            color: #fff;
+            font-size: 1.1rem;
+        }
+        .navbar-toggler-custom {
+            border: none;
+            background: transparent;
+            color: var(--color-text);
+            font-size: 1.35rem;
+            padding: 0.5rem;
+            cursor: pointer;
+            border-radius: 8px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .navbar-toggler-custom:hover {
+            color: var(--color-primary);
+            background: #f8fafc;
+        }
+        .navbar-toggler-custom:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        }
+        .nav-link-custom {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--color-text-secondary) !important;
+            padding: 0.55rem 1rem !important;
+            border-radius: 8px;
+            transition: all var(--transition-fast);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            white-space: nowrap;
+        }
+        .nav-link-custom i {
+            font-size: 0.85rem;
+            width: 18px;
+            text-align: center;
+        }
+        .nav-link-custom:hover {
+            color: var(--color-primary) !important;
+            background: #f8fafc;
+        }
+        .nav-link-custom.active-link {
+            color: var(--color-primary) !important;
+            background: var(--color-primary-light);
+            font-weight: 600;
+        }
+        .nav-links-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+            flex-wrap: wrap;
+        }
+        .btn-logout {
+            font-weight: 500;
+            font-size: 0.88rem;
+            padding: 0.5rem 1.2rem;
+            border-radius: 8px;
+            border: 1.5px solid #e2e8f0;
+            background: var(--color-surface);
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            white-space: nowrap;
+        }
+        .btn-logout:hover {
+            border-color: #ef4444;
+            color: #ef4444;
+            background: #fef2f2;
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.06);
+        }
+        .btn-logout i {
+            transition: transform var(--transition-fast);
+        }
+        .btn-logout:hover i {
+            transform: translateX(2px);
+        }
+
+        @media (max-width: 991.98px) {
+            .navbar-collapse-custom {
+                position: absolute;
+                top: 68px;
+                left: 0;
+                right: 0;
+                background: var(--color-surface);
+                border-bottom: 1px solid var(--color-border);
+                padding: 1rem 1.5rem;
+                box-shadow: var(--shadow-lg);
+                border-radius: 0 0 var(--radius-md) var(--radius-md);
+                z-index: 1029;
+                display: none;
+                flex-direction: column;
+                gap: 0.3rem;
+                animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .navbar-collapse-custom.show {
+                display: flex;
+            }
+            .nav-links-wrapper {
+                flex-direction: column;
+                gap: 0.2rem;
+                width: 100%;
+            }
+            .nav-link-custom {
+                padding: 0.7rem 1rem !important;
+                width: 100%;
+                font-size: 0.95rem;
+            }
+            .btn-logout {
+                width: 100%;
+                justify-content: center;
+                margin-top: 0.5rem;
+            }
+            .navbar-custom {
+                padding: 0 1rem;
+            }
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── Main Container ── */
+        .main-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1.8rem 1.5rem 3rem;
+        }
+
+        /* ── Page Header ── */
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .page-header h2 {
+            font-weight: 700;
+            font-size: 1.65rem;
+            letter-spacing: -0.02em;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: var(--color-text);
+        }
+        .page-header h2 i {
+            color: var(--color-primary);
+        }
+        .page-header .subtitle {
+            color: var(--color-text-secondary);
+            font-weight: 400;
+            font-size: 0.95rem;
+        }
+
+        /* ── Form Card ── */
+        .form-card {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            margin-bottom: 2rem;
+            transition: box-shadow var(--transition-smooth);
+        }
+        .form-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+        .form-card .card-header {
+            background: #f8fafc;
+            padding: 0.85rem 1.25rem;
+            border-bottom: 1px solid var(--color-border);
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--color-text);
+        }
+        .form-card .card-header i {
+            color: var(--color-primary);
+            font-size: 0.9rem;
+        }
+        .form-card .card-body {
+            padding: 1.5rem;
+        }
+        .form-card .form-label {
+            font-weight: 500;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: var(--color-text-secondary);
+            margin-bottom: 0.25rem;
+        }
+        .form-card .form-control,
+        .form-card .form-select {
+            border-radius: var(--radius-sm);
+            border: 1.5px solid var(--color-border);
+            font-size: 0.9rem;
+            padding: 0.45rem 0.85rem;
+            transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+            background: #fafbfc;
+        }
+        .form-card .form-control:focus,
+        .form-card .form-select:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+            background: #fff;
+        }
+        .form-card .btn {
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 0.45rem 1.25rem;
+            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .form-card .btn i {
+            font-size: 0.9rem;
+        }
+        .btn-primary-custom {
+            background: var(--color-primary);
+            border: none;
+            color: #fff;
+        }
+        .btn-primary-custom:hover {
+            background: var(--color-primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+        .btn-primary-custom:active {
+            transform: translateY(0);
+        }
+        .btn-secondary-custom {
+            background: #f1f5f9;
+            border: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+        }
+        .btn-secondary-custom:hover {
+            background: #e2e8f0;
+            color: var(--color-text);
+        }
+
+        /* ── Announcement Cards ── */
         .announce-card {
-            border-left: 4px solid #0d6efd;
-            transition: 0.2s;
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-sm);
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1rem;
+            transition: all var(--transition-smooth);
+            border-left: 4px solid var(--color-primary);
         }
         .announce-card:hover {
-            background-color: #f8f9fa;
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        .announce-card .card-header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .announce-card .card-title {
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: var(--color-text);
+            margin: 0;
+        }
+        .announce-card .card-content {
+            color: var(--color-text-secondary);
+            margin: 0.5rem 0 0.75rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .announce-card .card-meta {
+            font-size: 0.8rem;
+            color: var(--color-text-muted);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem 1rem;
+        }
+        .announce-card .card-meta i {
+            margin-right: 0.2rem;
+            opacity: 0.6;
+        }
+        .announce-card .card-meta .edited {
+            color: var(--color-primary);
+            font-weight: 500;
+        }
+        .announce-card .btn-group-actions {
+            display: flex;
+            gap: 0.3rem;
+            flex-shrink: 0;
+        }
+        .btn-action-announce {
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            padding: 0.3rem 0.7rem;
+            border: none;
+            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .btn-action-announce i {
+            font-size: 0.7rem;
+        }
+        .btn-action-announce.edit {
+            background: var(--color-primary-light);
+            color: var(--color-primary);
+        }
+        .btn-action-announce.edit:hover {
+            background: var(--color-primary);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+            transform: translateY(-1px);
+        }
+        .btn-action-announce.delete {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+        .btn-action-announce.delete:hover {
+            background: #dc2626;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+            transform: translateY(-1px);
+        }
+        .btn-action-announce:active {
+            transform: translateY(0);
+        }
+
+        /* ── Empty State ── */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: var(--color-text-secondary);
+        }
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--color-text-muted);
+            opacity: 0.3;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+        .empty-state h5 {
+            font-weight: 600;
+            color: var(--color-text);
+        }
+        .empty-state p {
+            font-size: 0.9rem;
+            max-width: 380px;
+            margin: 0.25rem auto 0;
+        }
+
+        /* ── Toast ── */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-width: 380px;
+            width: 100%;
+        }
+        .toast-custom {
+            background: var(--color-surface);
+            border-radius: var(--radius-sm);
+            padding: 0.85rem 1.2rem;
+            box-shadow: var(--shadow-lg);
+            border-left: 4px solid var(--color-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: toastIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--color-text);
+        }
+        .toast-custom.success {
+            border-left-color: #059669;
+        }
+        .toast-custom.danger {
+            border-left-color: #dc2626;
+        }
+        .toast-custom .toast-icon {
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .toast-custom.success .toast-icon {
+            color: #059669;
+        }
+        .toast-custom.danger .toast-icon {
+            color: #dc2626;
+        }
+        .toast-custom .toast-close {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: var(--color-text-muted);
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 0 0.25rem;
+            transition: color var(--transition-fast);
+        }
+        .toast-custom .toast-close:hover {
+            color: var(--color-text);
+        }
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(24px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .page-header h2 {
+                font-size: 1.3rem;
+            }
+            .announce-card .card-header-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .announce-card .btn-group-actions {
+                justify-content: flex-end;
+            }
+            .form-card .card-body {
+                padding: 1rem;
+            }
+        }
+        @media (max-width: 576px) {
+            .main-container {
+                padding: 1rem 0.75rem 2rem;
+            }
+            .announce-card {
+                padding: 1rem;
+            }
+            .announce-card .card-title {
+                font-size: 0.95rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2>📢 Manage Announcements</h2>
-            <a href="../dashboard.html" class="btn btn-secondary">← Dashboard</a>
+
+    <!-- ═══ NAVBAR ═══ -->
+    <nav class="navbar-custom" id="mainNavbar">
+        <a class="navbar-brand-custom" href="#">
+            <span class="brand-icon"><i class="fa-solid fa-building-columns"></i></span>
+            HRMS
+        </a>
+        <button class="navbar-toggler-custom d-lg-none ms-auto me-2" type="button" id="navbarToggler">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="navbar-collapse-custom d-lg-flex align-items-center ms-auto" id="navbarContent">
+            <div class="nav-links-wrapper me-lg-3" id="navLinksContainer"></div>
+            <button class="btn-logout mt-2 mt-lg-0" id="logoutBtn">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </button>
+        </div>
+    </nav>
+
+    <!-- ═══ MAIN ═══ -->
+    <div class="main-container">
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <h2>
+                <i class="fa-solid fa-bullhorn"></i> Manage Announcements
+                <span class="subtitle">· Create, edit, and delete posts</span>
+            </h2>
         </div>
 
-        <!-- Add / Edit Form -->
-        <div class="card mb-4">
+        <!-- Form Card -->
+        <div class="form-card" id="formCard">
             <div class="card-header">
-                <h5 id="formTitle">Create New Announcement</h5>
+                <i class="fa-regular fa-pen-to-square"></i>
+                <span id="formTitle">Create New Announcement</span>
             </div>
             <div class="card-body">
                 <form id="announceForm">
-                    <input type="hidden" id="editId">
+                    <input type="hidden" id="editId" />
                     <div class="mb-3">
                         <label for="title" class="form-label">Title</label>
-                        <input type="text" class="form-control" id="title" required>
+                        <input type="text" class="form-control" id="title" placeholder="Announcement title" required />
                     </div>
                     <div class="mb-3">
                         <label for="content" class="form-label">Content</label>
-                        <textarea class="form-control" id="content" rows="4" required></textarea>
+                        <textarea class="form-control" id="content" rows="4" placeholder="Write your announcement here..." required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary" id="submitBtn">Post</button>
-                    <button type="button" class="btn btn-secondary" id="cancelEditBtn" style="display:none;">Cancel</button>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button type="submit" class="btn btn-primary-custom" id="submitBtn">
+                            <i class="fa-regular fa-paper-plane"></i> Post
+                        </button>
+                        <button type="button" class="btn btn-secondary-custom" id="cancelEditBtn" style="display:none;">
+                            <i class="fa-regular fa-xmark"></i> Cancel
+                        </button>
+                    </div>
+                    <div id="formMessage" class="mt-2"></div>
                 </form>
-                <div id="formMessage" class="mt-2"></div>
             </div>
         </div>
 
-        <!-- Existing Announcements List -->
-        <div id="announceList"></div>
-        <div id="message"></div>
+        <!-- Announcements List -->
+        <div id="announceList">
+            <div class="empty-state">
+                <i class="fa-regular fa-bullhorn"></i>
+                <h5>No announcements yet</h5>
+                <p>Create your first announcement using the form above.</p>
+            </div>
+        </div>
+        <div id="message" class="mt-3"></div>
     </div>
 
-    <script src="../js/api.js"></script>
+    <!-- ═══ TOAST CONTAINER ═══ -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="../js/api.js">
+    </script>
     <script>
-        let editingId = null;
+        (function() {
+            'use strict';
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadAnnouncements();
+            // ── Navbar & Logout ──
+            document.addEventListener('DOMContentLoaded', () => {
+                const role = localStorage.getItem('role');
+                if (!role) { window.location.href = 'login.html'; return; }
 
-            document.getElementById('announceForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const id = document.getElementById('editId').value;
-                const title = document.getElementById('title').value;
-                const content = document.getElementById('content').value;
-                try {
-                    if (id) {
-                        // Update
-                        await apiCall(`announcements/${id}`, 'PUT', { title, content });
-                        document.getElementById('formMessage').innerHTML = '<div class="alert alert-success">Updated</div>';
-                    } else {
-                        // Create
-                        await apiCall('announcements', 'POST', { title, content });
-                        document.getElementById('formMessage').innerHTML = '<div class="alert alert-success">Posted</div>';
-                    }
-                    resetForm();
-                    loadAnnouncements();
-                } catch (err) {
-                    document.getElementById('formMessage').innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
-                }
-            });
-
-            document.getElementById('cancelEditBtn').addEventListener('click', resetForm);
-        });
-
-        function resetForm() {
-            document.getElementById('announceForm').reset();
-            document.getElementById('editId').value = '';
-            document.getElementById('formTitle').textContent = 'Create New Announcement';
-            document.getElementById('submitBtn').textContent = 'Post';
-            document.getElementById('cancelEditBtn').style.display = 'none';
-            editingId = null;
-            document.getElementById('formMessage').innerHTML = '';
-        }
-
-        function editAnnouncement(id) {
-            // Fetch the announcement and populate form
-            apiCall('announcements').then(data => {
-                const ann = data.find(a => a.id == id);
-                if (ann) {
-                    document.getElementById('editId').value = ann.id;
-                    document.getElementById('title').value = ann.title;
-                    document.getElementById('content').value = ann.content;
-                    document.getElementById('formTitle').textContent = 'Edit Announcement';
-                    document.getElementById('submitBtn').textContent = 'Update';
-                    document.getElementById('cancelEditBtn').style.display = 'inline-block';
-                    editingId = id;
-                    // Scroll to form
-                    document.querySelector('.card').scrollIntoView({ behavior: 'smooth' });
-                }
-            });
-        }
-
-        async function deleteAnnouncement(id) {
-            if (!confirm('Delete this announcement?')) return;
-            try {
-                await apiCall(`announcements/${id}`, 'DELETE');
-                loadAnnouncements();
-                document.getElementById('message').innerHTML = '<div class="alert alert-success">Deleted</div>';
-            } catch (err) {
-                document.getElementById('message').innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
-            }
-        }
-
-        async function loadAnnouncements() {
-            try {
-                const data = await apiCall('announcements');
-                const container = document.getElementById('announceList');
-                container.innerHTML = '';
-                if (data.length === 0) {
-                    container.innerHTML = '<div class="alert alert-info">No announcements yet.</div>';
-                    return;
-                }
-                data.forEach(a => {
-                    const card = document.createElement('div');
-                    card.className = 'card mb-3 announce-card';
-                    const created = new Date(a.created_at).toLocaleString();
-                    const updated = a.updated_at ? new Date(a.updated_at).toLocaleString() : null;
-                    const isEdited = updated && updated !== created;
-                    card.innerHTML = `
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <h5 class="card-title">${a.title}</h5>
-                                <div>
-                                    <button class="btn btn-sm btn-warning" onclick="editAnnouncement(${a.id})">Edit</button>
-                                    <button class="btn btn-sm btn-danger" onclick="deleteAnnouncement(${a.id})">Delete</button>
-                                </div>
-                            </div>
-                            <p class="card-text">${a.content}</p>
-                            <div class="timeline">
-                                <span>Posted: ${created}</span>
-                                ${isEdited ? `<span class="ms-3">Last updated: ${updated}</span>` : ''}
-                            </div>
-                            <small class="text-muted">Posted by ${a.admin_employee_id || 'Admin'}</small>
-                        </div>
-                    `;
-                    container.appendChild(card);
+                const navLinksContainer = document.getElementById('navLinksContainer');
+                const links = [
+                    { href: '../dashboard.html', label: 'Dashboard', icon: 'fa-solid fa-gauge-high' },
+                    { href: 'employees.html', label: 'Employees', icon: 'fa-solid fa-users' },
+                    { href: 'attendance.html', label: 'Attendance', icon: 'fa-solid fa-clipboard-user' },
+                    { href: 'leaves.html', label: 'Leave Approvals', icon: 'fa-solid fa-calendar-check' },
+                    { href: 'payroll.html', label: 'Payroll', icon: 'fa-solid fa-indian-rupee-sign' },
+                    { href: 'announcements.html', label: 'Announcements', icon: 'fa-solid fa-bullhorn' },
+                    { href: '../announcements.html', label: 'Live Feed', icon: 'fa-solid fa-rss' }
+                ];
+                links.forEach(link => {
+                    const a = document.createElement('a');
+                    a.className = 'nav-link-custom';
+                    a.href = link.href;
+                    a.innerHTML = `<i class="${link.icon}"></i> ${link.label}`;
+                    if (link.href === 'announcements.html') a.classList.add('active-link');
+                    navLinksContainer.appendChild(a);
                 });
-            } catch (err) {
-                document.getElementById('message').innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
-            }
-        }
+
+                // Mobile toggler
+                const navbarToggler = document.getElementById('navbarToggler');
+                const navbarContent = document.getElementById('navbarContent');
+                const togglerIcon = navbarToggler.querySelector('i');
+                navbarToggler.addEventListener('click', () => {
+                    const isShown = navbarContent.classList.toggle('show');
+                    togglerIcon.className = isShown ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+                });
+                navLinksContainer.addEventListener('click', (e) => {
+                    if (e.target.closest('a') && navbarContent.classList.contains('show')) {
+                        navbarContent.classList.remove('show');
+                        togglerIcon.className = 'fa-solid fa-bars';
+                    }
+                });
+                window.addEventListener('scroll', () => {
+                    document.getElementById('mainNavbar').classList.toggle('scrolled', window.scrollY > 10);
+                });
+
+                document.getElementById('logoutBtn').addEventListener('click', async () => {
+                    try { await apiCall('logout', 'POST'); } catch (_) {}
+                    localStorage.removeItem('role');
+                    window.location.href = '../login.html';
+                });
+
+                // ── Announcements Logic ──
+                let editingId = null;
+
+                // Load on page load
+                loadAnnouncements();
+
+                // Form submit
+                document.getElementById('announceForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const id = document.getElementById('editId').value;
+                    const title = document.getElementById('title').value.trim();
+                    const content = document.getElementById('content').value.trim();
+
+                    if (!title || !content) {
+                        showToast('Please fill in both title and content', 'danger');
+                        return;
+                    }
+
+                    try {
+                        if (id) {
+                            // Update
+                            await apiCall(`announcements/${id}`, 'PUT', { title, content });
+                            showToast('Announcement updated', 'success');
+                        } else {
+                            // Create
+                            await apiCall('announcements', 'POST', { title, content });
+                            showToast('Announcement posted', 'success');
+                        }
+                        resetForm();
+                        loadAnnouncements();
+                    } catch (err) {
+                        showToast(err.message, 'danger');
+                    }
+                });
+
+                // Cancel edit
+                document.getElementById('cancelEditBtn').addEventListener('click', resetForm);
+
+                // ── Reset Form ──
+                function resetForm() {
+                    document.getElementById('announceForm').reset();
+                    document.getElementById('editId').value = '';
+                    document.getElementById('formTitle').textContent = 'Create New Announcement';
+                    document.getElementById('submitBtn').innerHTML = '<i class="fa-regular fa-paper-plane"></i> Post';
+                    document.getElementById('cancelEditBtn').style.display = 'none';
+                    editingId = null;
+                    document.getElementById('formMessage').innerHTML = '';
+                }
+
+                // ── Edit Announcement ──
+                window.editAnnouncement = async function(id) {
+                    try {
+                        const data = await apiCall('announcements');
+                        const ann = data.find(a => a.id == id);
+                        if (!ann) { showToast('Announcement not found', 'danger'); return; }
+
+                        document.getElementById('editId').value = ann.id;
+                        document.getElementById('title').value = ann.title;
+                        document.getElementById('content').value = ann.content;
+                        document.getElementById('formTitle').textContent = 'Edit Announcement';
+                        document.getElementById('submitBtn').innerHTML = '<i class="fa-regular fa-floppy-disk"></i> Update';
+                        document.getElementById('cancelEditBtn').style.display = 'inline-block';
+                        editingId = id;
+                        // Scroll to form
+                        document.getElementById('formCard').scrollIntoView({ behavior: 'smooth' });
+                    } catch (err) {
+                        showToast(err.message, 'danger');
+                    }
+                };
+
+                // ── Delete Announcement ──
+                window.deleteAnnouncement = async function(id) {
+                    // Find title for confirmation
+                    try {
+                        const data = await apiCall('announcements');
+                        const ann = data.find(a => a.id == id);
+                        if (!ann) return;
+                        if (!confirm(`Delete announcement "${ann.title}"? This action cannot be undone.`)) return;
+                        await apiCall(`announcements/${id}`, 'DELETE');
+                        showToast('Announcement deleted', 'success');
+                        loadAnnouncements();
+                    } catch (err) {
+                        showToast(err.message, 'danger');
+                    }
+                };
+
+                // ── Load Announcements ──
+                async function loadAnnouncements() {
+                    try {
+                        const data = await apiCall('announcements');
+                        const container = document.getElementById('announceList');
+                        container.innerHTML = '';
+                        if (data.length === 0) {
+                            container.innerHTML = `
+                                <div class="empty-state">
+                                    <i class="fa-regular fa-bullhorn"></i>
+                                    <h5>No announcements yet</h5>
+                                    <p>Create your first announcement using the form above.</p>
+                                </div>
+                            `;
+                            return;
+                        }
+                        data.forEach(a => {
+                            const card = document.createElement('div');
+                            card.className = 'announce-card';
+                            const created = new Date(a.created_at).toLocaleString('en-IN', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                            const updated = a.updated_at ? new Date(a.updated_at).toLocaleString('en-IN', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            }) : null;
+                            const isEdited = updated && updated !== created;
+
+                            card.innerHTML = `
+                                <div class="card-header-actions">
+                                    <h5 class="card-title">${a.title}</h5>
+                                    <div class="btn-group-actions">
+                                        <button class="btn-action-announce edit" onclick="editAnnouncement(${a.id})">
+                                            <i class="fa-regular fa-pen-to-square"></i> Edit
+                                        </button>
+                                        <button class="btn-action-announce delete" onclick="deleteAnnouncement(${a.id})">
+                                            <i class="fa-regular fa-trash-can"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-content">${a.content}</div>
+                                <div class="card-meta">
+                                    <span><i class="fa-regular fa-clock"></i> Posted: ${created}</span>
+                                    ${isEdited ? `<span class="edited"><i class="fa-regular fa-pen-to-square"></i> Edited: ${updated}</span>` : ''}
+                                    <span><i class="fa-regular fa-user"></i> ${a.admin_employee_id || 'Admin'}</span>
+                                </div>
+                            `;
+                            container.appendChild(card);
+                        });
+                    } catch (err) {
+                        document.getElementById('message').innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+                    }
+                }
+
+                // ── Toast ──
+                function showToast(message, type = 'success') {
+                    const container = document.getElementById('toastContainer');
+                    const toast = document.createElement('div');
+                    toast.className = `toast-custom ${type}`;
+                    const iconMap = {
+                        success: 'fa-regular fa-circle-check',
+                        danger: 'fa-regular fa-circle-xmark',
+                        warning: 'fa-regular fa-triangle-exclamation',
+                        info: 'fa-regular fa-circle-info'
+                    };
+                    toast.innerHTML = `
+                        <span class="toast-icon"><i class="${iconMap[type] || iconMap.info}"></i></span>
+                        <span>${message}</span>
+                        <button class="toast-close" onclick="this.closest('.toast-custom').remove()">&times;</button>
+                    `;
+                    container.appendChild(toast);
+                    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 4500);
+                }
+            });
+        })();
     </script>
 </body>
 </html>
