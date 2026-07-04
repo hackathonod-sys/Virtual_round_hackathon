@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HRMS Mock Data Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; }
+        
+        .card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        }
+        
+        .data-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: all 0.3s;
+        }
+        .data-card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .status-badge {
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        .status-active { background: #dcfce7; color: #166534; }
+        .status-inactive { background: #fee2e2; color: #991b1b; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-approved { background: #dcfce7; color: #166534; }
+        .status-rejected { background: #fee2e2; color: #991b1b; }
+        .status-present { background: #dcfce7; color: #166534; }
+        .status-absent { background: #fee2e2; color: #991b1b; }
+        .status-half_day { background: #fef3c7; color: #92400e; }
+        .status-leave { background: #dbeafe; color: #1e40af; }
+        .status-weekend { background: #e5e7eb; color: #374151; }
+        
+        .tab-btn {
+            padding: 10px 24px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 500;
+            color: #6b7280;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        .tab-btn:hover {
+            color: #4f46e5;
+            background: #eef2ff;
+        }
+        .tab-btn.active {
+            color: #4f46e5;
+            border-bottom-color: #4f46e5;
+            background: #eef2ff;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        thead {
+            background: #f9fafb;
+        }
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+            white-space: nowrap;
+        }
+        td {
+            padding: 10px 16px;
+            border-bottom: 1px solid #f3f4f6;
+            vertical-align: middle;
+        }
+        tr:hover {
+            background: #f9fafb;
+        }
+        
+        .search-box {
+            padding: 8px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+            min-width: 250px;
+        }
+        .search-box:focus {
+            border-color: #667eea;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-blue { background: #dbeafe; color: #1e40af; }
+        .badge-green { background: #dcfce7; color: #166534; }
+        .badge-red { background: #fee2e2; color: #991b1b; }
+        .badge-yellow { background: #fef3c7; color: #92400e; }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 30px;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .modal-close {
+            float: right;
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #9ca3af;
+            transition: color 0.3s;
+        }
+        .modal-close:hover { color: #374151; }
+        
+        .json-viewer {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .json-viewer .key { color: #fcd34d; }
+        .json-viewer .string { color: #34d399; }
+        .json-viewer .number { color: #60a5fa; }
+        .json-viewer .boolean { color: #f472b6; }
+        .json-viewer .null { color: #94a3b8; }
+        
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #1e293b;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            z-index: 2000;
+            animation: slideUp 0.3s ease;
+            display: none;
+        }
+        .toast.success { background: #065f46; }
+        .toast.error { background: #991b1b; }
+        
+        .file-info {
+            background: #f8fafc;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== TOAST ===== -->
+    <div id="toast" class="toast"></div>
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">🏢</span>
+                <h1 class="text-xl font-bold text-gray-800">HRMS Mock Data</h1>
+                <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">v1.0.0</span>
+            </div>
+            <div class="flex items-center gap-4 text-sm">
+                <span class="text-gray-500">📁 <span id="dataCount">0</span> files</span>
+                <span class="text-gray-500">📊 <span id="recordCount">0</span> records</span>
+                <button onclick="refreshAll()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition text-sm flex items-center gap-2">
+                    🔄 Refresh
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <div class="max-w-7xl mx-auto px-4 py-6">
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+            <div class="data-card">
+                <p class="text-sm text-gray-500">Total Users</p>
+                <p class="stat-number" id="totalUsers">0</p>
+            </div>
+            <div class="data-card">
+                <p class="text-sm text-gray-500">Total Employees</p>
+                <p class="stat-number" id="totalEmployees">0</p>
+            </div>
+            <div class="data-card">
+                <p class="text-sm text-gray-500">Attendance Records</p>
+                <p class="stat-number" id="totalAttendance">0</p>
+            </div>
+            <div class="data-card">
+                <p class="text-sm text-gray-500">Leave Requests</p>
+                <p class="stat-number" id="totalLeaves">0</p>
+            </div>
+            <div class="data-card">
+                <p class="text-sm text-gray-500">Payroll Records</p>
+                <p class="stat-number" id="totalPayroll">0</p>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
+            <div class="border-b border-gray-200 flex flex-wrap overflow-x-auto">
+                <button class="tab-btn active" data-tab="users" onclick="switchTab('users')">👤 Users</button>
+                <button class="tab-btn" data-tab="employees" onclick="switchTab('employees')">👥 Employees</button>
+                <button class="tab-btn" data-tab="attendance" onclick="switchTab('attendance')">📅 Attendance</button>
+                <button class="tab-btn" data-tab="leave" onclick="switchTab('leave')">📋 Leave</button>
+                <button class="tab-btn" data-tab="payroll" onclick="switchTab('payroll')">💰 Payroll</button>
+                <button class="tab-btn" data-tab="json" onclick="switchTab('json')">📄 JSON Viewer</button>
+            </div>
+        </div>
+
+        <!-- ===== TAB: USERS ===== -->
+        <div id="tab-users" class="tab-content active">
+            <div class="flex flex-wrap gap-4 mb-4">
+                <input type="text" id="userSearch" class="search-box flex-1" placeholder="🔍 Search users..." onkeyup="filterUsers()" />
+                <select id="userRoleFilter" class="border border-gray-300 rounded-lg px-4 py-2 text-sm outline-none" onchange="filterUsers()">
+                    <option value="">All Roles</option>
+                    <option value="admin">Admin</option>
+                    <option value="hr">HR</option>
+                    <option value="employee">Employee</option>
+                </select>
+                <select id="userStatusFilter" class="border border-gray-300 rounded-lg px-4 py-2 text-sm outline-none" onchange="filterUsers()">
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Last Login</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        <tr><td colspan="7" class="text-center py-8 text-gray-500">Loading users...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ===== TAB: EMPLOYEES ===== -->
+        <div id="tab-employees" class="tab-content">
+            <div class="flex flex-wrap gap-4 mb-4">
+                <input type="text" id="empSearch" class="search-box flex-1" placeholder="🔍 Search employees..." onkeyup="filterEmployees()" />
+                <select id="empDeptFilter" class="border border-gray-300 rounded-lg px-4 py-2 text-sm outline-none" onchange="filterEmployees()">
+                    <option value="">All Departments</option>
+                </select>
+                <select id="empStatusFilter" class="border border-gray-300 rounded-lg px-4 py-2 text-sm outline-none" onchange="filterEmployees()">
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Employee ID</th>
+                            <th>Name</th>
+                            <th>Department</th>
+                            <th>Designation</th>
+                            <th>Salary</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employeeTableBody">
+                        <tr><td colspan="7" class="text-center py-8 text-gray-500">Loading employees...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ===== TAB: ATTENDANCE ===== -->
+        <div id="tab-attendance" class="tab-content">
+            <div class="flex flex-wrap gap-4 mb-4">
+                <input type="text" id="attSearch" class="search-box flex-1" placeholder="🔍 Search attendance..." onkeyup="filterAttendance()" />
+                <input type="date" id="attDateFilter" class="border border-gray-300 rounded-lg px-4 py-2 text-sm outline-none" onchange="filterAttendance()" />
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Date</th>
+                            <th>Day</th>
+                            <th>Check In</th>
+                            <th>Check Out</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceTableBody">
+                        <tr><td colspan="6" class="text-center py-8 text-gray-500">Loading attendance...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ===== TAB: LEAVE ===== -->
+        <div id="tab-leave" class="tab-content">
+            <div class="flex flex-wrap gap-4 mb-4">
+                <input type="text" id="leaveSearch" class="search-box flex-1" placeholder="🔍 Search leave requests..." onkeyup="filterLeaves()" />
+                <select id="leaveStatusFilter" class="border border-gray-300 rounded-lg px-4 py-2 text-sm outline-none" onchange="filterLeaves()">
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+                <select id="leaveTypeFilter" class="border border-gray-300 rounded-lg px-4 py-2 text-sm outline-none" onchange="filterLeaves()">
+                    <option value="">All Types</option>
+                    <option value="annual">Annual</option>
+                    <option value="sick">Sick</option>
+                    <option value="casual">Casual</option>
+                    <option value="unpaid">Unpaid</option>
+                </select>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Type</th>
+                            <th>Start</th>
+                            <th>End</th>
+                            <th>Days</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaveTableBody">
+                        <tr><td colspan="6" class="text-center py-8 text-gray-500">Loading leave requests...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ===== TAB: PAYROLL ===== -->
+        <div id="tab-payroll" class="tab-content">
+            <div class="flex flex-wrap gap-4 mb-4">
+                <input type="text" id="payrollSearch" class="search-box flex-1" placeholder="🔍 Search payroll..." onkeyup="filterPayroll()" />
+                <select id="payrollStatusFilter" class="border border-gray-300 rounded-lg px-4 py-2 text-sm outline-none" onchange="filterPayroll()">
+                    <option value="">All Status</option>
+                    <option value="Paid">Paid</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Processing">Processing</option>
+                </select>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Basic</th>
+                            <th>Allowance</th>
+                            <th>Deduction</th>
+                            <th>Net Salary</th>
+                            <th>Month/Year</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="payrollTableBody">
+                        <tr><td colspan="7" class="text-center py-8 text-gray-500">Loading payroll...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ===== TAB: JSON VIEWER ===== -->
+        <div id="tab-json" class="tab-content">
+            <div class="flex flex-wrap gap-4 mb-4">
+                <select id="jsonFileSelect" class="border border-gray-300 rounded-lg px-4 py-2 text-sm outline-none" onchange="loadJsonFile()">
+                    <option value="user.json">user.json</option>
+                    <option value="employees.json">employees.json</option>
+                    <option value="attendance.json">attendance.json</option>
+                    <option value="leave.json">leave.json</option>
+                    <option value="payroll.json">payroll.json</option>
+                </select>
+                <button onclick="loadJsonFile()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition text-sm">📄 Load File</button>
+                <button onclick="copyJson()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition text-sm">📋 Copy JSON</button>
+                <button onclick="downloadJson()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition text-sm">⬇️ Download</button>
+            </div>
+            <div class="file-info mb-4">
+                <span class="text-sm text-gray-600">📁 File: <strong id="jsonFileName">user.json</strong></span>
+                <span class="text-sm text-gray-600 ml-4">📊 Records: <strong id="jsonRecordCount">0</strong></span>
+                <span class="text-sm text-gray-600 ml-4">📏 Size: <strong id="jsonFileSize">0 KB</strong></span>
+            </div>
+            <div class="json-viewer" id="jsonViewer">
+                <span class="text-gray-400">Loading JSON data...</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ===== JSON MODAL ===== -->
+    <div id="jsonModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <h2 class="text-xl font-bold mb-4">📄 JSON Data</h2>
+            <div class="json-viewer" id="modalJsonViewer"></div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  DATA STORE
+        // ============================================================
+        let mockData = {
+            users: null,
+            employees: null,
+            attendance: null,
+            leave: null,
+            payroll: null
+        };
+
+        let jsonData = null;
+        let currentJsonFile = 'user.json';
+
+        // ============================================================
+        //  LOAD DATA
+        // ============================================================
+        async function loadAllData() {
+            try {
+                // Load all JSON files
+                const files = ['user.json', 'employees.json', 'attendance.json', 'leave.json', 'payroll.json'];
+                const promises = files.map(file => 
+                    fetch(`assets/data/${file}`)
+                        .then(res => res.json())
+                        .catch(() => null)
+                );
+                
+                const results = await Promise.all(promises);
+                
+                mockData.users = results[0];
+                mockData.employees = results[1];
+                mockData.attendance = results[2];
+                mockData.leave = results[3];
+                mockData.payroll = results[4];
+
+                // Update counts
+                document.getElementById('dataCount').textContent = files.filter((f, i) => results[i] !== null).length;
+                
+                const totalRecords = 
+                    (mockData.users?.users?.length || 0) +
+                    (mockData.employees?.employees?.length || 0) +
+                    (mockData.attendance?.attendance_records?.length || 0) +
+                    (mockData.leave?.leave_requests?.length || 0) +
+                    (mockData.payroll?.payroll_records?.length || 0);
+                document.getElementById('recordCount').textContent = totalRecords;
+
+                // Update stats
+                document.getElementById('totalUsers').textContent = mockData.users?.users?.length || 0;
+                document.getElementById('totalEmployees').textContent = mockData.employees?.employees?.length || 0;
+                document.getElementById('totalAttendance').textContent = mockData.attendance?.attendance_records?.length || 0;
+                document.getElementById('totalLeaves').textContent = mockData.leave?.leave_requests?.length || 0;
+                document.getElementById('totalPayroll').textContent = mockData.payroll?.payroll_records?.length || 0;
+
+                // Render all tabs
+                renderUsers();
+                renderEmployees();
+                renderAttendance();
+                renderLeaves();
+                renderPayroll();
+                populateDepartmentFilter();
+                loadJsonFile();
+
+                showToast('✅ All data loaded successfully', 'success');
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showToast('❌ Error loading data: ' + error.message, 'error');
+            }
+        }
+
+        // ============================================================
+        //  RENDER USERS
+        // ============================================================
+        function renderUsers() {
+            const tbody = document.getElementById('userTableBody');
+            const users = mockData.users?.users || [];
+            
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-500">No users found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = users.map(u => `
+                <tr>
+                    <td>${u.id}</td>
+                    <td><code class="text-sm bg-gray-100 px-2 py-1 rounded">${u.username}</code></td>
+                    <td><strong>${u.name}</strong></td>
+                    <td>${u.email}</td>
+                    <td><span class="badge ${u.role === 'admin' ? 'badge-red' : u.role === 'hr' ? 'badge-blue' : 'badge-green'}">${u.role}</span></td>
+                    <td><span class="status-badge ${u.status === 'active' ? 'status-active' : 'status-inactive'}">${u.status}</span></td>
+                    <td class="text-sm text-gray-500">${u.last_login || '—'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function filterUsers() {
+            const search = document.getElementById('userSearch').value.toLowerCase();
+            const role = document.getElementById('userRoleFilter').value;
+            const status = document.getElementById('userStatusFilter').value;
+            
+            const rows = document.querySelectorAll('#userTableBody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const roleMatch = !role || text.includes(role);
+                const statusMatch = !status || text.includes(status);
+                const searchMatch = !search || text.includes(search);
+                row.style.display = (roleMatch && statusMatch && searchMatch) ? '' : 'none';
+            });
+        }
+
+        // ============================================================
+        //  RENDER EMPLOYEES
+        // ============================================================
+        function renderEmployees() {
+            const tbody = document.getElementById('employeeTableBody');
+            const employees = mockData.employees?.employees || [];
+            
+            if (employees.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-500">No employees found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = employees.map(e => `
+                <tr>
+                    <td>${e.id}</td>
+                    <td><code class="text-sm bg-gray-100 px-2 py-1 rounded">${e.employee_id}</code></td>
+                    <td><strong>${e.name}</strong></td>
+                    <td>${e.department || '—'}</td>
+                    <td>${e.designation || '—'}</td>
+                    <td>$${e.salary?.toLocaleString() || '—'}</td>
+                    <td><span class="status-badge ${e.status === 'active' ? 'status-active' : 'status-inactive'}">${e.status || 'active'}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function populateDepartmentFilter() {
+            const select = document.getElementById('empDeptFilter');
+            const employees = mockData.employees?.employees || [];
+            const depts = [...new Set(employees.map(e => e.department).filter(Boolean))];
+            select.innerHTML = '<option value="">All Departments</option>' + 
+                depts.map(d => `<option value="${d}">${d}</option>`).join('');
+        }
+
+        function filterEmployees() {
+            const search = document.getElementById('empSearch').value.toLowerCase();
+            const dept = document.getElementById('empDeptFilter').value;
+            const status = document.getElementById('empStatusFilter').value;
+            
+            const rows = document.querySelectorAll('#employeeTableBody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const deptMatch = !dept || text.includes(dept.toLowerCase());
+                const statusMatch = !status || text.includes(status.toLowerCase());
+                const searchMatch = !search || text.includes(search);
+                row.style.display = (deptMatch && statusMatch && searchMatch) ? '' : 'none';
+            });
+        }
+
+        // ============================================================
+        //  RENDER ATTENDANCE
+        // ============================================================
+        function renderAttendance() {
+            const tbody = document.getElementById('attendanceTableBody');
+            const records = mockData.attendance?.attendance_records || [];
+            
+            if (records.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500">No attendance records found</td></tr>';
+                return;
+            }
+
+            // Show latest 100 records
+            const display = records.slice(-100).reverse();
+            tbody.innerHTML = display.map(r => `
+                <tr>
+                    <td><strong>${r.employee_name}</strong> <span class="text-xs text-gray-400">${r.employee_employee_id}</span></td>
+                    <td>${r.date}</td>
+                    <td>${r.day || '—'}</td>
+                    <td>${r.check_in || '—'}</td>
+                    <td>${r.check_out || '—'}</td>
+                    <td><span class="status-badge status-${r.status}">${r.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function filterAttendance() {
+            const search = document.getElementById('attSearch').value.toLowerCase();
+            const date = document.getElementById('attDateFilter').value;
+            
+            const rows = document.querySelectorAll('#attendanceTableBody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const dateMatch = !date || text.includes(date);
+                const searchMatch = !search || text.includes(search);
+                row.style.display = (dateMatch && searchMatch) ? '' : 'none';
+            });
+        }
+
+        // ============================================================
+        //  RENDER LEAVES
+        // ============================================================
+        function renderLeaves() {
+            const tbody = document.getElementById('leaveTableBody');
+            const leaves = mockData.leave?.leave_requests || [];
+            
+            if (leaves.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500">No leave requests found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = leaves.slice(-50).reverse().map(l => `
+                <tr>
+                    <td><strong>${l.employee_name}</strong></td>
+                    <td><span class="badge badge-blue">${l.leave_type}</span></td>
+                    <td>${l.start_date}</td>
+                    <td>${l.end_date}</td>
+                    <td>${l.days_requested}</td>
+                    <td><span class="status-badge status-${l.status}">${l.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function filterLeaves() {
+            const search = document.getElementById('leaveSearch').value.toLowerCase();
+            const status = document.getElementById('leaveStatusFilter').value;
+            const type = document.getElementById('leaveTypeFilter').value;
+            
+            const rows = document.querySelectorAll('#leaveTableBody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const statusMatch = !status || text.includes(status.toLowerCase());
+                const typeMatch = !type || text.includes(type.toLowerCase());
+                const searchMatch = !search || text.includes(search);
+                row.style.display = (statusMatch && typeMatch && searchMatch) ? '' : 'none';
+            });
+        }
+
+        // ============================================================
+        //  RENDER PAYROLL
+        // ============================================================
+        function renderPayroll() {
+            const tbody = document.getElementById('payrollTableBody');
+            const records = mockData.payroll?.payroll_records || [];
+            
+            if (records.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-500">No payroll records found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = records.map(r => `
+                <tr>
+                    <td><strong>${r.employee_name}</strong></td>
+                    <td>$${r.basic_salary?.toLocaleString() || '—'}</td>
+                    <td>$${r.allowances?.total?.toLocaleString() || '—'}</td>
+                    <td>$${r.deductions?.total?.toLocaleString() || '—'}</td>
+                    <td><strong>$${r.net_salary?.toLocaleString() || '—'}</strong></td>
+                    <td>${r.month}/${r.year}</td>
+                    <td><span class="status-badge ${r.payment_status === 'Paid' ? 'status-active' : 'status-pending'}">${r.payment_status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function filterPayroll() {
+            const search = document.getElementById('payrollSearch').value.toLowerCase();
+            const status = document.getElementById('payrollStatusFilter').value;
+            
+            const rows = document.querySelectorAll('#payrollTableBody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const statusMatch = !status || text.includes(status.toLowerCase());
+                const searchMatch = !search || text.includes(search);
+                row.style.display = (statusMatch && searchMatch) ? '' : 'none';
+            });
+        }
+
+        // ============================================================
+        //  JSON VIEWER
+        // ============================================================
+        function loadJsonFile() {
+            const file = document.getElementById('jsonFileSelect').value;
+            currentJsonFile = file;
+            
+            const fileMap = {
+                'user.json': mockData.users,
+                'employees.json': mockData.employees,
+                'attendance.json': mockData.attendance,
+                'leave.json': mockData.leave,
+                'payroll.json': mockData.payroll
+            };
+            
+            const data = fileMap[file];
+            if (!data) {
+                document.getElementById('jsonViewer').innerHTML = '<span class="text-gray-400">No data loaded for this file</span>';
+                document.getElementById('jsonRecordCount').textContent = '0';
+                document.getElementById('jsonFileSize').textContent = '0 KB';
+                return;
+            }
+            
+            jsonData = data;
+            const jsonStr = JSON.stringify(data, null, 2);
+            const size = (new Blob([jsonStr]).size / 1024).toFixed(1);
+            
+            document.getElementById('jsonFileName').textContent = file;
+            document.getElementById('jsonRecordCount').textContent = countRecords(data);
+            document.getElementById('jsonFileSize').textContent = size + ' KB';
+            
+            // Syntax highlight JSON
+            const highlighted = syntaxHighlight(jsonStr);
+            document.getElementById('jsonViewer').innerHTML = highlighted;
+        }
+
+        function countRecords(data) {
+            if (!data) return 0;
+            if (data.users) return data.users.length;
+            if (data.employees) return data.employees.length;
+            if (data.attendance_records) return data.attendance_records.length;
+            if (data.leave_requests) return data.leave_requests.length;
+            if (data.payroll_records) return data.payroll_records.length;
+            return Object.keys(data).length;
+        }
+
+        function syntaxHighlight(json) {
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*
