@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HRMS – Full API Integration</title>
+  <!-- Tailwind CSS for styling (customize later) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .section { display: none; }
+    .section.active { display: block; }
+    .toast { transition: opacity 0.3s; }
+    .capitalize { text-transform: capitalize; }
+  </style>
+</head>
+<body class="bg-gray-50 font-sans antialiased">
+
+  <div id="app" class="min-h-screen">
+
+    <!-- ===== NAVBAR ===== -->
+    <nav id="navbar" class="bg-white shadow px-4 py-3 flex items-center justify-between sticky top-0 z-50 hidden">
+      <div class="flex items-center gap-4">
+        <span class="text-xl font-bold text-blue-700">HRMS</span>
+        <span id="roleBadge" class="text-sm bg-gray-200 px-3 py-1 rounded-full"></span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="userName" class="text-sm font-medium"></span>
+        <button onclick="logout()" class="text-sm bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200">Logout</button>
+      </div>
+    </nav>
+
+    <!-- ===== TOAST NOTIFICATION ===== -->
+    <div id="toast" class="fixed top-20 right-4 px-6 py-3 rounded shadow-lg z-50 hidden transition-opacity duration-300"></div>
+
+    <!-- ============================================ -->
+    <!-- ===== AUTH SECTIONS ===== -->
+    <!-- ============================================ -->
+
+    <!-- Login -->
+    <div id="loginSection" class="section active min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+        <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">HRMS Login</h2>
+        <form id="loginForm" class="space-y-4">
+          <input type="email" id="loginEmail" placeholder="Email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+          <input type="password" id="loginPassword" placeholder="Password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition">Sign In</button>
+        </form>
+        <p class="text-center mt-4 text-sm text-gray-600">Don't have an account? <a href="#" onclick="showSection('signupSection')" class="text-blue-600 hover:underline">Sign Up</a></p>
+        <p id="loginError" class="text-red-500 text-sm text-center mt-2 hidden"></p>
+      </div>
+    </div>
+
+    <!-- Signup -->
+    <div id="signupSection" class="section min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+        <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Create Account</h2>
+        <form id="signupForm" class="space-y-4">
+          <input type="text" id="signupEmpId" placeholder="Employee ID" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+          <input type="text" id="signupName" placeholder="Full Name" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+          <input type="email" id="signupEmail" placeholder="Email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+          <input type="password" id="signupPassword" placeholder="Password (min 6 chars)" required minlength="6" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+          <select id="signupRole" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            <option value="employee">Employee</option>
+            <option value="admin">Admin / HR</option>
+          </select>
+          <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition">Register</button>
+        </form>
+        <p class="text-center mt-4 text-sm text-gray-600">Already have an account? <a href="#" onclick="showSection('loginSection')" class="text-blue-600 hover:underline">Login</a></p>
+        <p id="signupError" class="text-red-500 text-sm text-center mt-2 hidden"></p>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- ===== EMPLOYEE SECTIONS ===== -->
+    <!-- ============================================ -->
+
+    <div id="employeeApp" class="section">
+
+      <!-- Employee Dashboard -->
+      <div id="empDashboard" class="section active p-6 max-w-6xl mx-auto">
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">👋 Welcome, <span id="empDashName"></span></h1>
+        <p class="text-gray-500 mb-6">Here's your quick overview</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div onclick="showEmployeeSection('empProfile')" class="bg-white p-6 rounded-xl shadow hover:shadow-lg cursor-pointer transition text-center">
+            <div class="text-4xl mb-2">👤</div>
+            <h3 class="font-semibold">Profile</h3>
+          </div>
+          <div onclick="showEmployeeSection('empAttendance')" class="bg-white p-6 rounded-xl shadow hover:shadow-lg cursor-pointer transition text-center">
+            <div class="text-4xl mb-2">📅</div>
+            <h3 class="font-semibold">Attendance</h3>
+          </div>
+          <div onclick="showEmployeeSection('empLeave')" class="bg-white p-6 rounded-xl shadow hover:shadow-lg cursor-pointer transition text-center">
+            <div class="text-4xl mb-2">📋</div>
+            <h3 class="font-semibold">Leave Requests</h3>
+          </div>
+          <div onclick="showEmployeeSection('empPayroll')" class="bg-white p-6 rounded-xl shadow hover:shadow-lg cursor-pointer transition text-center">
+            <div class="text-4xl mb-2">💰</div>
+            <h3 class="font-semibold">Payroll</h3>
+          </div>
+        </div>
+        <!-- Recent activity -->
+        <div class="mt-8 bg-white p-4 rounded-xl shadow">
+          <h4 class="font-semibold text-gray-700">📌 Recent Activity</h4>
+          <ul id="recentActivity" class="mt-2 text-sm text-gray-600 space-y-1"></ul>
+        </div>
+      </div>
+
+      <!-- Employee Profile -->
+      <div id="empProfile" class="section p-6 max-w-3xl mx-auto">
+        <div class="flex items-center gap-4 mb-4">
+          <button onclick="showEmployeeSection('empDashboard')" class="text-blue-600 hover:underline">← Back</button>
+          <h2 class="text-2xl font-bold">My Profile</h2>
+        </div>
+        <div id="profileView" class="bg-white p-6 rounded-xl shadow space-y-3">
+          <p><strong>Name:</strong> <span id="pName"></span></p>
+          <p><strong>Email:</strong> <span id="pEmail"></span></p>
+          <p><strong>Employee ID:</strong> <span id="pEmpId"></span></p>
+          <p><strong>Job Title:</strong> <span id="pJobTitle"></span></p>
+          <p><strong>Department:</strong> <span id="pDept"></span></p>
+          <p><strong>Salary:</strong> $<span id="pSalary"></span></p>
+          <p><strong>Address:</strong> <span id="pAddress"></span></p>
+          <p><strong>Phone:</strong> <span id="pPhone"></span></p>
+          <p><strong>Profile Picture:</strong> <span id="pPhoto" class="text-gray-400">(not set)</span></p>
+          <button onclick="toggleProfileEdit()" class="mt-3 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Edit Profile</button>
+        </div>
+        <div id="profileEdit" class="bg-white p-6 rounded-xl shadow hidden">
+          <h3 class="font-semibold mb-3">Edit Profile (limited fields)</h3>
+          <form id="profileEditForm" class="space-y-3">
+            <input id="editAddress" placeholder="Address" class="w-full border p-2 rounded" />
+            <input id="editPhone" placeholder="Phone" class="w-full border p-2 rounded" />
+            <input id="editPhoto" placeholder="Photo URL (optional)" class="w-full border p-2 rounded" />
+            <div class="flex gap-2">
+              <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Save</button>
+              <button type="button" onclick="toggleProfileEdit()" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Employee Attendance -->
+      <div id="empAttendance" class="section p-6 max-w-4xl mx-auto">
+        <div class="flex items-center gap-4 mb-4">
+          <button onclick="showEmployeeSection('empDashboard')" class="text-blue-600 hover:underline">← Back</button>
+          <h2 class="text-2xl font-bold">My Attendance</h2>
+        </div>
+        <div id="attendanceToday" class="bg-white p-4 rounded-xl shadow mb-6">
+          <p class="font-semibold">Today: <span id="todayStatus" class="text-gray-600">Not checked in</span></p>
+          <div class="flex gap-2 mt-2">
+            <button onclick="checkIn()" id="checkInBtn" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Check In</button>
+            <button onclick="checkOut()" id="checkOutBtn" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 hidden">Check Out</button>
+          </div>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow">
+          <h3 class="font-semibold mb-2">This Week</h3>
+          <ul id="weeklyAttendance" class="divide-y"></ul>
+        </div>
+        <!-- Monthly calendar with markers (simplified as list) -->
+        <div class="mt-6 bg-white p-4 rounded-xl shadow">
+          <h3 class="font-semibold mb-2">📅 Monthly Overview (Current Month)</h3>
+          <div id="monthlyAttendance" class="grid grid-cols-7 gap-1 text-sm"></div>
+        </div>
+      </div>
+
+      <!-- Employee Leave -->
+      <div id="empLeave" class="section p-6 max-w-4xl mx-auto">
+        <div class="flex items-center gap-4 mb-4">
+          <button onclick="showEmployeeSection('empDashboard')" class="text-blue-600 hover:underline">← Back</button>
+          <h2 class="text-2xl font-bold">Leave Requests</h2>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow mb-6">
+          <h3 class="font-semibold mb-3">Apply for Leave</h3>
+          <form id="leaveApplyForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <select id="leaveType" class="border p-2 rounded">
+              <option>Paid</option>
+              <option>Sick</option>
+              <option>Unpaid</option>
+            </select>
+            <input type="date" id="leaveStart" required class="border p-2 rounded" />
+            <input type="date" id="leaveEnd" required class="border p-2 rounded" />
+            <textarea id="leaveRemarks" placeholder="Remarks" class="border p-2 rounded col-span-2"></textarea>
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 col-span-2">Submit</button>
+          </form>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow">
+          <h3 class="font-semibold mb-2">My Leave History</h3>
+          <table class="w-full text-left text-sm">
+            <thead class="border-b"><tr><th>Type</th><th>Start</th><th>End</th><th>Status</th><th>Remarks</th></tr></thead>
+            <tbody id="leaveHistory"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Employee Payroll -->
+      <div id="empPayroll" class="section p-6 max-w-3xl mx-auto">
+        <div class="flex items-center gap-4 mb-4">
+          <button onclick="showEmployeeSection('empDashboard')" class="text-blue-600 hover:underline">← Back</button>
+          <h2 class="text-2xl font-bold">My Payroll</h2>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow space-y-3">
+          <p><strong>Basic Salary:</strong> $<span id="payBasic"></span></p>
+          <p><strong>Allowances:</strong> $<span id="payAllowances"></span></p>
+          <p><strong>Deductions:</strong> $<span id="payDeductions"></span></p>
+          <p class="text-xl font-bold text-green-700">Net Pay: $<span id="payNet"></span></p>
+          <p><strong>Pay Date:</strong> <span id="payDate"></span></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- ===== ADMIN SECTIONS ===== -->
+    <!-- ============================================ -->
+
+    <div id="adminApp" class="section">
+
+      <!-- Admin Dashboard -->
+      <div id="adminDashboard" class="section active p-6 max-w-6xl mx-auto">
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">🛠️ Admin Dashboard</h1>
+        <p class="text-gray-500 mb-6">Manage employees, attendance, and leave approvals</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div onclick="showAdminSection('adminEmployees')" class="bg-white p-6 rounded-xl shadow hover:shadow-lg cursor-pointer transition text-center">
+            <div class="text-4xl mb-2">👥</div>
+            <h3 class="font-semibold">Employee List</h3>
+          </div>
+          <div onclick="showAdminSection('adminAttendance')" class="bg-white p-6 rounded-xl shadow hover:shadow-lg cursor-pointer transition text-center">
+            <div class="text-4xl mb-2">📊</div>
+            <h3 class="font-semibold">All Attendance</h3>
+          </div>
+          <div onclick="showAdminSection('adminLeave')" class="bg-white p-6 rounded-xl shadow hover:shadow-lg cursor-pointer transition text-center">
+            <div class="text-4xl mb-2">✅</div>
+            <h3 class="font-semibold">Leave Approvals</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin Employee List -->
+      <div id="adminEmployees" class="section p-6 max-w-6xl mx-auto">
+        <div class="flex items-center gap-4 mb-4">
+          <button onclick="showAdminSection('adminDashboard')" class="text-blue-600 hover:underline">← Back</button>
+          <h2 class="text-2xl font-bold">All Employees</h2>
+        </div>
+        <div class="bg-white rounded-xl shadow overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-gray-50 border-b"><tr><th class="p-3">ID</th><th>Name</th><th>Email</th><th>Role</th><th>Department</th><th>Salary</th><th>Action</th></tr></thead>
+            <tbody id="adminEmployeeTable"></tbody>
+          </table>
+        </div>
+        <!-- Edit Salary Modal (simple inline) -->
+        <div id="editSalaryModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div class="bg-white p-6 rounded-xl shadow-lg w-96">
+            <h3 class="text-xl font-bold mb-4">Edit Employee</h3>
+            <label class="block text-sm mb-1">Salary</label>
+            <input type="number" id="editSalaryInput" class="w-full border p-2 rounded mb-4" />
+            <label class="block text-sm mb-1">Department</label>
+            <input type="text" id="editSalaryDept" placeholder="Department" class="w-full border p-2 rounded mb-4" />
+            <div class="flex gap-2">
+              <button onclick="saveSalaryEdit()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Save</button>
+              <button onclick="closeSalaryModal()" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin All Attendance -->
+      <div id="adminAttendance" class="section p-6 max-w-6xl mx-auto">
+        <div class="flex items-center gap-4 mb-4">
+          <button onclick="showAdminSection('adminDashboard')" class="text-blue-600 hover:underline">← Back</button>
+          <h2 class="text-2xl font-bold">All Attendance Records</h2>
+        </div>
+        <div class="bg-white rounded-xl shadow overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-gray-50 border-b"><tr><th class="p-3">Employee</th><th>Date</th><th>Status</th></tr></thead>
+            <tbody id="adminAttendanceTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Admin Leave Approvals -->
+      <div id="adminLeave" class="section p-6 max-w-6xl mx-auto">
+        <div class="flex items-center gap-4 mb-4">
+          <button onclick="showAdminSection('adminDashboard')" class="text-blue-600 hover:underline">← Back</button>
+          <h2 class="text-2xl font-bold">Leave Approvals</h2>
+        </div>
+        <div class="bg-white rounded-xl shadow overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-gray-50 border-b"><tr><th class="p-3">Employee</th><th>Type</th><th>Start</th><th>End</th><th>Status</th><th>Comments</th><th>Actions</th></tr></thead>
+            <tbody id="adminLeaveTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- ===== JAVASCRIPT ===== -->
+  <!-- ============================================ -->
+  <script>
+    // ============================================================
+    //  API CONFIGURATION
+    // ============================================================
+    const API_BASE = 'http://localhost/backend/api/'; // CHANGE to your backend URL
+
+    // Helper for fetch with credentials
+    async function apiFetch(endpoint, options = {}) {
+      const url = endpoint.startsWith('http') ? endpoint : API_BASE + endpoint;
+      const response = await fetch(url, {
+        ...options,
+        credentials: 'include', // send cookies
+        headers: {
+          'Content-Type': 'application/json',
+          ...(options.headers || {})
+        },
+        body: options.body ? JSON.stringify(options.body) : undefined
+      });
+      // Parse JSON response (even for errors)
+      let data;
+      try { data = await response.json(); } catch (e) { data = { error: 'Invalid response' }; }
+      if (!response.ok) {
+        throw new Error(data.message || data.error || `HTTP ${response.status}`);
+      }
+      return data;
+    }
+
+    // ============================================================
+    //  AUTH STATE
+    // ============================================================
+    let currentUser = null;
+
+    async function checkSession() {
+      try {
+        const data = await apiFetch('auth.php?action=check');
+        if (data.user) {
+          currentUser = data.user;
+          return true;
+        }
+      } catch (e) {}
+      return false;
+    }
+
+    function setCurrentUser(user) {
+      currentUser = user;
+      if (user) {
+        localStorage.setItem('hrms_session', JSON.stringify({ userId: user.id }));
+      } else {
+        localStorage.removeItem('hrms_session');
+      }
+    }
+
+    async function loadSession() {
+      const raw = localStorage.getItem('hrms_session');
+      if (raw) {
+        try {
+          const { userId } = JSON.parse(raw);
+          const ok = await checkSession();
+          if (ok) return true;
+        } catch (e) {}
+      }
+      return false;
+    }
+
+    // ============================================================
+    //  UI HELPERS
+    // ============================================================
+
+    function showToast(msg, color = 'green') {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.className = `fixed top-20 right-4 px-6 py-3 rounded shadow-lg z-50 transition-opacity duration-300 ${color === 'green' ? 'bg-green-600' : 'bg-red-600'} text-white`;
+      toast.classList.remove('hidden');
+      setTimeout(() => { toast.classList.add('hidden'); }, 3000);
+    }
+
+    function showSection(sectionId) {
+      document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+      document.getElementById(sectionId).classList.add('active');
+    }
+
+    function showEmployeeSection(sectionId) {
+      document.querySelectorAll('#employeeApp .section').forEach(el => el.classList.remove('active'));
+      document.getElementById(sectionId).classList.add('active');
+    }
+
+    function showAdminSection(sectionId) {
+      document.querySelectorAll('#adminApp .section').forEach(el => el.classList.remove('active'));
+      document.getElementById(sectionId).classList.add('active');
+    }
+
+    function renderApp() {
+      const nav = document.getElementById('navbar');
+      const empApp = document.getElementById('employeeApp');
+      const adminApp = document.getElementById('adminApp');
+      const login = document.getElementById('loginSection');
+      const signup = document.getElementById('signupSection');
+
+      nav.classList.add('hidden');
+      empApp.classList.remove('active');
+      adminApp.classList.remove('active');
+      login.classList.remove('active');
+      signup.classList.remove('active');
+
+      if (!currentUser) {
+        login.classList.add('active');
+        return;
+      }
+
+      nav.classList.remove('hidden');
+      document.getElementById('roleBadge').textContent = currentUser.role.toUpperCase();
+      document.getElementById('userName').textContent = currentUser.name;
+
+      if (currentUser.role === 'admin' || currentUser.role === 'hr') {
+        adminApp.classList.add('active');
+        showAdminSection('adminDashboard');
+        renderAdminEmployees();
+        renderAdminAttendance();
+        renderAdminLeaves();
+      } else {
+        empApp.classList.add('active');
+        showEmployeeSection('empDashboard');
+        renderEmployeeDashboard();
+        renderProfile();
+        renderAttendance();
+        renderLeaveHistory();
+        renderPayroll();
+        renderRecentActivity();
+        renderMonthlyCalendar();
+      }
+    }
+
+    // ============================================================
+    //  AUTH HANDLERS
+    // ============================================================
+
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value.trim();
+      const errorEl = document.getElementById('loginError');
+
+      try {
+        const data = await apiFetch('auth.php?action=login', {
+          method: 'POST',
+          body: { email, password }
+        });
+        setCurrentUser(data.user);
+        renderApp();
+        showToast('Welcome, ' + data.user.name);
+      } catch (err) {
+        errorEl.textContent = err.message || 'Login failed';
+        errorEl.classList.remove('hidden');
+      }
+    });
+
+    document.getElementById('signupForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const employee_id = document.getElementById('signupEmpId').value.trim();
+      const name = document.getElementById('signupName').value.trim();
+      const email = document.getElementById('signupEmail').value.trim();
+      const password = document.getElementById('signupPassword').value;
+      const role = document.getElementById('signupRole').value;
+      const errorEl = document.getElementById('signupError');
+
+      try {
+        const data = await apiFetch('auth.php?action=register', {
+          method: 'POST',
+          body: { employee_id, name, email, password, role }
+        });
+        // After registration, login the user
+        setCurrentUser(data.user);
+        renderApp();
+        showToast('Account created! Welcome ' + name);
+      } catch (err) {
+        errorEl.textContent = err.message || 'Registration failed';
+        errorEl.classList.remove('hidden');
+      }
+    });
+
+    async function logout() {
+      try {
+        await apiFetch('auth.php?action=logout');
+      } catch (e) {}
+      setCurrentUser(null);
+      renderApp();
+      showToast('Logged out');
+    }
+
+    // ============================================================
+    //  EMPLOYEE DASHBOARD
+    // ============================================================
+
+    function renderEmployeeDashboard() {
+      document.getElementById('empDashName').textContent = currentUser.name;
+    }
+
+    async function renderRecentActivity() {
+      const list = document.getElementById('recentActivity');
+      try {
+        const leaves = await apiFetch('leave.php');
+        const recent = leaves.slice(-3).reverse();
+        if (recent.length === 0) {
+          list.innerHTML = '<li>No recent activity</li>';
+          return;
+        }
+        list.innerHTML = recent.map(l =>
+          `<li>📌 Leave request (${l.leave_type}) - ${l.status} (${l.start_date} to ${l.end_date})</li>`
+        ).join('');
+      } catch (e) {
+        list.innerHTML = '<li>Could not load activity</li>';
+      }
+    }
+
+    // ============================================================
+    //  PROFILE
+    // ============================================================
+
+    async function renderProfile() {
+      const u = currentUser;
+      document.getElementById('pName').textContent = u.name;
+      document.getElementById('pEmail').textContent = u.email;
+      document.getElementById('pEmpId').textContent = u.employee_id || u.empId;
+      document.getElementById('pJobTitle').textContent = u.job_title || 'N/A';
+      document.getElementById('pDept').textContent = u.department || 'N/A';
+      document.getElementById('pSalary').textContent = u.salary || '0';
+      document.getElementById('pAddress').textContent = u.address || 'Not set';
+      document.getElementById('pPhone').textContent = u.phone || 'Not set';
+      document.getElementById('pPhoto').textContent = u.photo || '(not set)';
+      // Edit fields
+      document.getElementById('editAddress').value = u.address || '';
+      document.getElementById('editPhone').value = u.phone || '';
+      document.getElementById('editPhoto').value = u.photo || '';
+    }
+
+    function toggleProfileEdit() {
+      const view = document.getElementById('profileView');
+      const edit = document.getElementById('profileEdit');
+      if (edit.classList.contains('hidden')) {
+        edit.classList.remove('hidden');
+        view.classList.add('hidden');
+      } else {
+        edit.classList.add('hidden');
+        view.classList.remove('hidden');
+      }
+    }
+
+    document.getElementById('profileEditForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const address = document.getElementById('editAddress').value.trim();
+      const phone = document.getElementById('editPhone').value.trim();
+      const photo = document.getElementById('editPhoto').value.trim();
+      try {
+        const updated = await apiFetch(`employees.php?id=${currentUser.id}`, {
+          method: 'PUT',
+          body: { address, phone, photo }
+        });
+        currentUser = updated.user || updated; // assume server returns updated user
+        saveSession(currentUser);
+        renderProfile();
+        toggleProfileEdit();
+        showToast('Profile updated');
+      } catch (err) {
+        showToast(err.message, 'red');
+      }
+    });
+
+    // helper to save session after update
+    function saveSession(user) {
+      localStorage.setItem('hrms_session', JSON.stringify({ userId: user.id }));
+    }
+
+    // ============================================================
+    //  ATTENDANCE (Employee)
+    // ============================================================
+
+    function getTodayKey() {
+      return new Date().toISOString().split('T')[0];
+    }
+
+    async function renderAttendance() {
+      const userId = currentUser.id;
+      const today = getTodayKey();
+      // Get today's status from API?
+      // The API might not give today separately, we can check by calling attendance with month/year
+      const now = new Date();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const year = now.getFullYear();
+      try {
+        const records = await apiFetch(`attendance.php?month=${month}&year=${year}`);
+        const todayRec = records.find(r => r.date === today);
+        const status = todayRec ? todayRec.status : null;
+        const statusEl = document.getElementById('todayStatus');
+        const checkInBtn = document.getElementById('checkInBtn');
+        const checkOutBtn = document.getElementById('checkOutBtn');
+
+        // We need to know if checked in/out for today. We can use a separate flag or store in localStorage?
+        // For simplicity, we use a local flag (or we could check if today's status is 'Present' and no checkout time)
+        // But the API might provide check_in/check_out times. I'll assume we have them if present.
+        // Let's just use the status: if status === 'Present' and no checkout, allow checkout.
+        // We'll store a local flag for demo simplicity.
+        // Better: we can have a separate endpoint to check today's status.
+        // Since API doesn't give that, we'll use a localStorage flag for checkin state.
+        const checkState = JSON.parse(localStorage.getItem('attendance_check_' + userId) || '{}');
+        const todayCheck = checkState[today] || {};
+
+        if (todayCheck.checkedIn && todayCheck.checkedOut) {
+          statusEl.textContent = 'Checked Out (Completed)';
+          checkInBtn.classList.add('hidden');
+          checkOutBtn.classList.add('hidden');
+        } else if (todayCheck.checkedIn) {
+          statusEl.textContent = 'Checked In (In progress)';
+          checkInBtn.classList.add('hidden');
+          checkOutBtn.classList.remove('hidden');
+        } else {
+          statusEl.textContent = 'Not checked in';
+          checkInBtn.classList.remove('hidden');
+          checkOutBtn.classList.add('hidden');
+        }
+
+        // Weekly view
+        const weekDays = [];
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date();
+          d.setDate(d.getDate() - i);
+          weekDays.push(d.toISOString().split('T')[0]);
+        }
+        const list = document.getElementById('weeklyAttendance');
+        list.innerHTML = weekDays.map(date => {
+          const rec = records.find(r => r.date === date);
+          const st = rec ? rec.status : '—';
+          const color = st === 'Present' ? 'text-green-600' :
+                        st === 'Absent' ? 'text-red-600' :
+                        st === 'Half-day' ? 'text-yellow-600' :
+                        st === 'Leave' ? 'text-blue-600' : 'text-gray-400';
+          return `<li class="flex justify-between py-2 border-b"><span>${date}</span><span class="font-medium ${color}">${st}</span></li>`;
+        }).join('');
+
+        // Monthly calendar - can use same records
+        // We'll render it in another function
+        renderMonthlyCalendar(records);
+      } catch (err) {
+        showToast('Failed to load attendance: ' + err.message, 'red');
+      }
+    }
+
+    // Separate monthly calendar rendering
+    async function renderMonthlyCalendar(records) {
+      const container = document.getElementById('monthlyAttendance');
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      let html = '';
+      const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      days.forEach(d => html += `<div class="font-bold text-center py-1">${d}</div>`);
+      for (let i = 0; i < firstDay; i++) html += `<div></div>`;
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const rec = records ? records.find(r => r.date === dateStr) : null;
+        const status = rec ? rec.status : '';
+        const bg = status === 'Present' ? 'bg-green-200' :
+                   status === 'Absent' ? 'bg-red-200' :
+                   status === 'Half-day' ? 'bg-yellow-200' :
+                   status === 'Leave' ? 'bg-blue-200' : 'bg-gray-100';
+        html += `<div class="text-center p-1 rounded ${bg} text-xs">${d}</div>`;
+      }
+      container.innerHTML = html;
+    }
+
+    async function checkIn() {
+      try {
+        const data = await apiFetch('attendance.php?action=checkin', { method: 'POST' });
+        // Store local flag
+        const userId = currentUser.id;
+        const today = getTodayKey();
+        const checkState = JSON.parse(localStorage.getItem('attendance_check_' + userId) || '{}');
+        if (!checkState[today]) checkState[today] = {};
+        checkState[today].checkedIn = true;
+        localStorage.setItem('attendance_check_' + userId, JSON.stringify(checkState));
+        showToast('Checked in successfully');
+        renderAttendance();
+      } catch (err) {
+        showToast(err.message, 'red');
+      }
+    }
+
+    async function checkOut() {
+      try {
+        const data = await apiFetch('attendance.php?action=checkout', { method: 'POST' });
+        const userId = currentUser.id;
+        const today = getTodayKey();
+        const checkState = JSON.parse(localStorage.getItem('attendance_check_' + userId) || '{}');
+        if (!checkState[today]) checkState[today] = {};
+        checkState[today].checkedOut = true;
+        localStorage.setItem('attendance_check_' + userId, JSON.stringify(checkState));
+        showToast('Checked out successfully');
+        renderAttendance();
+      } catch (err) {
+        showToast(err.message, 'red');
+      }
+    }
+
+    // ============================================================
+    //  LEAVE (Employee)
+    // ============================================================
+
+    async function renderLeaveHistory() {
+      try {
+        const leaves = await apiFetch('leave.php');
+        const tbody = document.getElementById('leaveHistory');
+        if (leaves.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="py-2 text-gray-500">No leave requests</td></tr>';
+          return;
+        }
+        tbody.innerHTML = leaves.map(l => `
+          <tr class="border-b">
+            <td>${l.leave_type}</td>
+            <td>${l.start_date}</td>
+            <td>${l.end_date}</td>
+            <td class="font-medium ${l.status === 'Approved' ? 'text-green-600' : l.status === 'Rejected' ? 'text-red-600' : 'text-yellow-600'}">${l.status}</td>
+            <td>${l.reason || '-'}</td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        showToast('Failed to load leaves: ' + err.message, 'red');
+      }
+    }
+
+    document.getElementById('leaveApplyForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const leave_type = document.getElementById('leaveType').value;
+      const start_date = document.getElementById('leaveStart').value;
+      const end_date = document.getElementById('leaveEnd').value;
+      const reason = document.getElementById('leaveRemarks').value.trim();
+
+      if (!start_date || !end_date) {
+        showToast('Please select start and end dates', 'red');
+        return;
+      }
+      if (new Date(start_date) > new Date(end_date)) {
+        showToast('Start date must be before end date', 'red');
+        return;
+      }
+
+      try {
+        await apiFetch('leave.php', {
+          method: 'POST',
+          body: { leave_type, start_date, end_date, reason }
+        });
+        renderLeaveHistory();
+        renderRecentActivity();
+        document.getElementById('leaveApplyForm').reset();
+        showToast('Leave application submitted');
+      } catch (err) {
+        showToast(err.message, 'red');
+      }
+    });
+
+    // ============================================================
+    //  PAYROLL (Employee)
+    // ============================================================
+
+    async function renderPayroll() {
+      try {
+        const now = new Date();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = now.getFullYear();
+        const payroll = await apiFetch(`payroll.php?month=${month}&year=${year}`);
+        // Assume payroll object has basic, allowance, deduction, net, pay_date
+        document.getElementById('payBasic').textContent = payroll.basic || 0;
+        document.getElementById('payAllowances').textContent = payroll.allowance || 0;
+        document.getElementById('payDeductions').textContent = payroll.deduction || 0;
+        document.getElementById('payNet').textContent = payroll.net || 0;
+        document.getElementById('payDate').textContent = payroll.pay_date || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      } catch (err) {
+        showToast('Failed to load payroll: ' + err.message, 'red');
+      }
+    }
+
+    // ============================================================
+    //  ADMIN: Employee List + Salary Edit
+    // ============================================================
+
+    let editingUserId = null;
+
+    async function renderAdminEmployees() {
+      try {
+        const employees = await apiFetch('employees.php');
+        const tbody = document.getElementById('adminEmployeeTable');
+        tbody.innerHTML = employees.map(u => `
+          <tr class="border-b">
+            <td class="p-3">${u.employee_id || u.empId}</td>
+            <td>${u.name}</td>
+            <td>${u.email}</td>
+            <td><span class="capitalize">${u.role}</span></td>
+            <td>${u.department || '—'}</td>
+            <td>$${u.salary}</td>
+            <td>
+              <button onclick="openSalaryEdit(${u.id})" class="bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600">Edit</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        showToast('Failed to load employees: ' + err.message, 'red');
+      }
+    }
+
+    function openSalaryEdit(userId) {
+      editingUserId = userId;
+      const user = currentUser; // we need to fetch user details or use a list; for simplicity we'll fetch again
+      // We'll just use the list from DOM or fetch again
+      // Since we don't have the user object, we'll fetch the single employee
+      apiFetch(`employees.php?id=${userId}`).then(u => {
+        document.getElementById('editSalaryInput').value = u.salary || 0;
+        document.getElementById('editSalaryDept').value = u.department || '';
+      }).catch(err => showToast(err.message, 'red'));
+      document.getElementById('editSalaryModal').classList.remove('hidden');
+    }
+
+    function closeSalaryModal() {
+      document.getElementById('editSalaryModal').classList.add('hidden');
+      editingUserId = null;
+    }
+
+    async function saveSalaryEdit() {
+      if (!editingUserId) return;
+      const salary = parseInt(document.getElementById('editSalaryInput').value) || 0;
+      const department = document.getElementById('editSalaryDept').value.trim();
+      try {
+        await apiFetch(`employees.php?id=${editingUserId}`, {
+          method: 'PUT',
+          body: { salary, department }
+        });
+        renderAdminEmployees();
+        closeSalaryModal();
+        showToast('Employee updated');
+      } catch (err) {
+        showToast(err.message, 'red');
+      }
+    }
+
+    // ============================================================
+    //  ADMIN: All Attendance
+    // ============================================================
+
+    async function renderAdminAttendance() {
+      try {
+        const now = new Date();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = now.getFullYear();
+        const records = await apiFetch(`attendance.php?action=admin&date_from=${year}-${month}-01&date_to=${year}-${month}-${new Date(year, month, 0).getDate()}`);
+        const tbody = document.getElementById('adminAttendanceTable');
+        if (records.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="3" class="py-2 text-gray-500">No attendance records</td></tr>';
+          return;
+        }
+        tbody.innerHTML = records.slice(0, 30).map(r => `
+          <tr class="border-b">
+            <td class="p-3">${r.employee_name}</td>
+            <td>${r.date}</td>
+            <td class="font-medium ${r.status === 'Present' ? 'text-green-600' : r.status === 'Absent' ? 'text-red-600' : r.status === 'Half-day' ? 'text-yellow-600' : r.status === 'Leave' ? 'text-blue-600' : 'text-gray-400'}">${r.status}</td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        showToast('Failed to load attendance: ' + err.message, 'red');
+      }
+    }
+
+    // ============================================================
+    //  ADMIN: Leave Approvals with Comments
+    // ============================================================
+
+    async function renderAdminLeaves() {
+      try {
+        const leaves = await apiFetch('leave.php?action=pending');
+        const tbody = document.getElementById('adminLeaveTable');
+        if (leaves.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" class="py-2 text-gray-500">No pending leave requests</td></tr>';
+          return;
+        }
+        tbody.innerHTML = leaves.map(l => {
+          const isPending = l.status === 'Pending';
+          return `
+            <tr class="border-b">
+              <td class="p-3">${l.employee_name}</td>
+              <td>${l.leave_type}</td>
+              <td>${l.start_date}</td>
+              <td>${l.end_date}</td>
+              <td class="font-medium ${l.status === 'Approved' ? 'text-green-600' : l.status === 'Rejected' ? 'text-red-600' : 'text-yellow-600'}">${l.status}</td>
+              <td>${l.remarks || '-'}</td>
+              <td>
+                ${isPending ? `
+                  <button onclick="openLeaveAction(${l.id}, 'approve')" class="bg-green-600 text-white text-xs px-3 py-1 rounded hover:bg-green-700 mr-1">Approve</button>
+                  <button onclick="openLeaveAction(${l.id}, 'reject')" class="bg-red-600 text-white text-xs px-3 py-1 rounded hover:bg-red-700">Reject</button>
+                ` : `<span class="text-gray-400 text-sm">${l.status}</span>`}
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        showToast('Failed to load leaves: ' + err.message, 'red');
+      }
+    }
+
+    async function openLeaveAction(leaveId, action) {
+      const remarks = prompt(`Enter comment for ${action}ing this leave:`);
+      if (remarks === null) return;
+      try {
+        await apiFetch(`leave.php?action=${action}&id=${leaveId}`, {
+          method: 'PUT',
+          body: { remarks }
+        });
+        renderAdminLeaves();
+        showToast(`Leave ${action}d`);
+      } catch (err) {
+        showToast(err.message, 'red');
+      }
+    }
+
+    // ============================================================
+    //  INIT
+    // ============================================================
+
+    (async function init() {
+      if (await loadSession()) {
+        renderApp();
+      } else {
+        renderApp();
+      }
+    })();
+  </script>
+</body>
+</html>
