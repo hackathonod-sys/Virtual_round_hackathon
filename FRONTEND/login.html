@@ -115,25 +115,34 @@
     }
 
     // ============================================================
-    //  SESSION CHECK (optional – redirect if already logged in)
+    //  SESSION CHECK – with loop‑break protection
     // ============================================================
     async function checkSession() {
+      // If we've already tried and failed in this page load, don't retry
+      if (window._sessionLoadFailed) return false;
+
       try {
         const data = await apiFetch('auth.php?action=check');
         if (data.success && data.data && data.data.user_id) {
-          // Fetch full user to get role
           const userData = await apiFetch('employees.php?id=' + data.data.user_id);
-          if (userData.success) {
+          if (userData.success && userData.data) {
             const user = userData.data;
+            // Redirect based on role
             if (user.role === 'admin' || user.role === 'hr') {
               window.location.href = 'admin/dashboard.html';
             } else {
               window.location.href = 'employee/dashboard.html';
             }
+            return true;
           }
         }
-      } catch (e) {
         // Not logged in – stay on page
+        window._sessionLoadFailed = true;
+        return false;
+      } catch (e) {
+        console.warn('Session check error:', e);
+        window._sessionLoadFailed = true;
+        return false;
       }
     }
 
@@ -189,7 +198,6 @@
           method: 'POST',
           body: { email, password }
         });
-        // data.data contains { id, name, role, employee_id }
         const user = data.data;
         showToast(`Welcome, ${user.name}!`, 'success');
 
@@ -243,7 +251,6 @@
       registerBtn.textContent = 'Creating...';
 
       try {
-        // Register
         await apiFetch('auth.php?action=register', {
           method: 'POST',
           body: { employee_id, name, email, password, role }
@@ -258,7 +265,6 @@
         const user = loginData.data;
         showToast(`Account created! Welcome, ${user.name}`, 'success');
 
-        // Redirect
         setTimeout(() => {
           if (user.role === 'admin' || user.role === 'hr') {
             window.location.href = 'admin/dashboard.html';
@@ -277,10 +283,25 @@
     });
 
     // ============================================================
-    //  INIT – check session on load
+    //  INIT – handle loop_break param and session check
     // ============================================================
-    checkSession();
-  </script>
+    (async function init() {
+      // If we have a loop_break param, clear it and show login (skip auto‑redirect)
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('loop_break') === '1') {
+        // Remove param from URL
+        const cleanUrl = window.location.pathname + window.location.hash;
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, cleanUrl);
+        }
+        // Optionally show a message
+        showToast('Please log in again to refresh your session.', 'info');
+        return;
+      }
 
+      // Normal session check – redirects if already logged in
+      await checkSession();
+    })();
+  </script>
 </body>
 </html>
