@@ -1,103 +1,993 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Leave Approvals</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        /* ── Root ── */
+        :root {
+            --font-primary: 'Poppins', sans-serif;
+            --color-bg: #f1f5f9;
+            --color-surface: #ffffff;
+            --color-primary: #4f46e5;
+            --color-primary-dark: #4338ca;
+            --color-primary-light: #eef2ff;
+            --color-text: #1e293b;
+            --color-text-secondary: #64748b;
+            --color-text-muted: #94a3b8;
+            --color-border: #e2e8f0;
+            --color-border-light: #f1f5f9;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.12);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --transition-fast: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-smooth: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ── Reset & Base ── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-bg);
+            color: var(--color-text);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Navbar ── */
+        .navbar-custom {
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: 0 1.5rem;
+            height: 68px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow var(--transition-smooth);
+        }
+        .navbar-custom.scrolled {
+            box-shadow: var(--shadow-md);
+        }
+        .navbar-brand-custom {
+            font-weight: 700;
+            font-size: 1.55rem;
+            letter-spacing: -0.02em;
+            color: var(--color-primary) !important;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            white-space: nowrap;
+        }
+        .navbar-brand-custom .brand-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border-radius: var(--radius-sm);
+            color: #fff;
+            font-size: 1.1rem;
+        }
+        .navbar-toggler-custom {
+            border: none;
+            background: transparent;
+            color: var(--color-text);
+            font-size: 1.35rem;
+            padding: 0.5rem;
+            cursor: pointer;
+            border-radius: 8px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .navbar-toggler-custom:hover {
+            color: var(--color-primary);
+            background: #f8fafc;
+        }
+        .navbar-toggler-custom:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        }
+        .nav-link-custom {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--color-text-secondary) !important;
+            padding: 0.55rem 1rem !important;
+            border-radius: 8px;
+            transition: all var(--transition-fast);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            white-space: nowrap;
+        }
+        .nav-link-custom i {
+            font-size: 0.85rem;
+            width: 18px;
+            text-align: center;
+        }
+        .nav-link-custom:hover {
+            color: var(--color-primary) !important;
+            background: #f8fafc;
+        }
+        .nav-link-custom.active-link {
+            color: var(--color-primary) !important;
+            background: var(--color-primary-light);
+            font-weight: 600;
+        }
+        .nav-links-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+            flex-wrap: wrap;
+        }
+        .btn-logout {
+            font-weight: 500;
+            font-size: 0.88rem;
+            padding: 0.5rem 1.2rem;
+            border-radius: 8px;
+            border: 1.5px solid #e2e8f0;
+            background: var(--color-surface);
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            white-space: nowrap;
+        }
+        .btn-logout:hover {
+            border-color: #ef4444;
+            color: #ef4444;
+            background: #fef2f2;
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.06);
+        }
+        .btn-logout i {
+            transition: transform var(--transition-fast);
+        }
+        .btn-logout:hover i {
+            transform: translateX(2px);
+        }
+
+        @media (max-width: 991.98px) {
+            .navbar-collapse-custom {
+                position: absolute;
+                top: 68px;
+                left: 0;
+                right: 0;
+                background: var(--color-surface);
+                border-bottom: 1px solid var(--color-border);
+                padding: 1rem 1.5rem;
+                box-shadow: var(--shadow-lg);
+                border-radius: 0 0 var(--radius-md) var(--radius-md);
+                z-index: 1029;
+                display: none;
+                flex-direction: column;
+                gap: 0.3rem;
+                animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .navbar-collapse-custom.show {
+                display: flex;
+            }
+            .nav-links-wrapper {
+                flex-direction: column;
+                gap: 0.2rem;
+                width: 100%;
+            }
+            .nav-link-custom {
+                padding: 0.7rem 1rem !important;
+                width: 100%;
+                font-size: 0.95rem;
+            }
+            .btn-logout {
+                width: 100%;
+                justify-content: center;
+                margin-top: 0.5rem;
+            }
+            .navbar-custom {
+                padding: 0 1rem;
+            }
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── Main Container ── */
+        .main-container {
+            max-width: 1360px;
+            margin: 0 auto;
+            padding: 1.8rem 1.5rem 3rem;
+        }
+
+        /* ── Page Header ── */
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .page-header h2 {
+            font-weight: 700;
+            font-size: 1.65rem;
+            letter-spacing: -0.02em;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: var(--color-text);
+        }
+        .page-header h2 i {
+            color: var(--color-primary);
+        }
+        .page-header .subtitle {
+            color: var(--color-text-secondary);
+            font-weight: 400;
+            font-size: 0.95rem;
+        }
+
+        /* ── Stats Row ── */
+        .stats-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem 1.5rem;
+            margin-bottom: 1.75rem;
+        }
+        .stat-box {
+            background: var(--color-surface);
+            border-radius: var(--radius-md);
+            padding: 0.75rem 1.25rem;
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: box-shadow var(--transition-smooth);
+        }
+        .stat-box:hover {
+            box-shadow: var(--shadow-md);
+        }
+        .stat-box .stat-icon {
+            font-size: 1.5rem;
+            color: var(--color-text-muted);
+            opacity: 0.6;
+        }
+        .stat-box .stat-number {
+            font-weight: 700;
+            font-size: 1.3rem;
+            line-height: 1.2;
+            color: var(--color-text);
+        }
+        .stat-box .stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--color-text-secondary);
+            font-weight: 500;
+        }
+        .stat-box .stat-detail {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Table Card ── */
+        .table-card {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            transition: box-shadow var(--transition-smooth);
+            margin-bottom: 1.75rem;
+        }
+        .table-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+        .table-card .card-header {
+            background: #f8fafc;
+            padding: 0.85rem 1.25rem;
+            border-bottom: 1px solid var(--color-border);
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--color-text);
+        }
+        .table-card .card-header i {
+            color: var(--color-primary);
+            font-size: 0.9rem;
+        }
+        .table-card .table-responsive {
+            max-height: 400px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+        .table-card .table-responsive::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .table-card .table-responsive::-webkit-scrollbar-track {
+            background: var(--color-border-light);
+        }
+        .table-card .table-responsive::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .table-card .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* ── Table ── */
+        .table-leaves {
+            margin: 0;
+            font-size: 0.88rem;
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+        }
+        .table-leaves thead th {
+            background: #f8fafc;
+            color: var(--color-text-secondary);
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 0.75rem 1rem;
+            border-bottom: 2px solid var(--color-border);
+            border-top: none;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+        }
+        .table-leaves thead th i {
+            margin-right: 0.35rem;
+            opacity: 0.6;
+            font-size: 0.7rem;
+        }
+        .table-leaves tbody td {
+            padding: 0.75rem 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid var(--color-border-light);
+            background: var(--color-surface);
+            transition: background var(--transition-fast);
+        }
+        .table-leaves tbody tr:hover td {
+            background: #fafbfc;
+        }
+        .table-leaves tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* ── Status Badge ── */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            text-transform: capitalize;
+            border: 1px solid transparent;
+        }
+        .status-badge .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        .status-badge.pending {
+            background: #fef3c7;
+            color: #92400e;
+            border-color: #fde68a;
+        }
+        .status-badge.pending .dot {
+            background: #d97706;
+        }
+        .status-badge.approved {
+            background: #d1fae5;
+            color: #065f46;
+            border-color: #a7f3d0;
+        }
+        .status-badge.approved .dot {
+            background: #059669;
+        }
+        .status-badge.rejected {
+            background: #fef2f2;
+            color: #991b1b;
+            border-color: #fca5a5;
+        }
+        .status-badge.rejected .dot {
+            background: #dc2626;
+        }
+
+        /* ── Action Buttons ── */
+        .action-group {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+        .btn-action-leave {
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.75rem;
+            padding: 0.3rem 0.75rem;
+            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-action-leave i {
+            font-size: 0.7rem;
+        }
+        .btn-action-leave.approve {
+            background: #059669;
+            color: #fff;
+        }
+        .btn-action-leave.approve:hover {
+            background: #047857;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        }
+        .btn-action-leave.reject {
+            background: #dc2626;
+            color: #fff;
+        }
+        .btn-action-leave.reject:hover {
+            background: #b91c1c;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+        }
+        .btn-action-leave:active {
+            transform: translateY(0);
+        }
+        .comment-input {
+            border: 1.5px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+            font-family: var(--font-primary);
+            background: #fafbfc;
+            transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+            min-width: 120px;
+            width: 100%;
+            max-width: 160px;
+        }
+        .comment-input:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+            outline: none;
+            background: #fff;
+        }
+        .comment-input::placeholder {
+            color: var(--color-text-muted);
+            font-size: 0.7rem;
+        }
+
+        /* ── Empty State ── */
+        .empty-state {
+            padding: 2rem 1.5rem;
+            text-align: center;
+            color: var(--color-text-secondary);
+        }
+        .empty-state i {
+            font-size: 2rem;
+            color: var(--color-text-muted);
+            margin-bottom: 0.5rem;
+            display: block;
+            opacity: 0.4;
+        }
+        .empty-state p {
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        /* ── Toast ── */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-width: 380px;
+            width: 100%;
+        }
+        .toast-custom {
+            background: var(--color-surface);
+            border-radius: var(--radius-sm);
+            padding: 0.85rem 1.2rem;
+            box-shadow: var(--shadow-lg);
+            border-left: 4px solid var(--color-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: toastIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--color-text);
+        }
+        .toast-custom.success {
+            border-left-color: #059669;
+        }
+        .toast-custom.danger {
+            border-left-color: #dc2626;
+        }
+        .toast-custom .toast-icon {
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .toast-custom.success .toast-icon {
+            color: #059669;
+        }
+        .toast-custom.danger .toast-icon {
+            color: #dc2626;
+        }
+        .toast-custom .toast-close {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: var(--color-text-muted);
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 0 0.25rem;
+            transition: color var(--transition-fast);
+        }
+        .toast-custom .toast-close:hover {
+            color: var(--color-text);
+        }
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(24px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* ── Animations ── */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .table-leaves tbody tr {
+            animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+        }
+        .table-leaves tbody tr:nth-child(1) {
+            animation-delay: 0.02s;
+        }
+        .table-leaves tbody tr:nth-child(2) {
+            animation-delay: 0.04s;
+        }
+        .table-leaves tbody tr:nth-child(3) {
+            animation-delay: 0.06s;
+        }
+        .table-leaves tbody tr:nth-child(4) {
+            animation-delay: 0.08s;
+        }
+        .table-leaves tbody tr:nth-child(5) {
+            animation-delay: 0.10s;
+        }
+        .table-leaves tbody tr:nth-child(6) {
+            animation-delay: 0.12s;
+        }
+        .table-leaves tbody tr:nth-child(7) {
+            animation-delay: 0.14s;
+        }
+        .table-leaves tbody tr:nth-child(8) {
+            animation-delay: 0.16s;
+        }
+        .table-leaves tbody tr:nth-child(9) {
+            animation-delay: 0.18s;
+        }
+        .table-leaves tbody tr:nth-child(10) {
+            animation-delay: 0.20s;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .page-header h2 {
+                font-size: 1.3rem;
+            }
+            .table-leaves {
+                font-size: 0.8rem;
+            }
+            .table-leaves thead th,
+            .table-leaves tbody td {
+                padding: 0.55rem 0.65rem;
+            }
+            .comment-input {
+                max-width: 100%;
+                min-width: 80px;
+            }
+            .action-group {
+                gap: 0.25rem;
+            }
+            .btn-action-leave {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.5rem;
+            }
+            .stats-row {
+                gap: 0.5rem;
+            }
+            .stat-box {
+                padding: 0.5rem 1rem;
+                flex: 1 1 calc(50% - 0.5rem);
+            }
+            .stat-box .stat-number {
+                font-size: 1.1rem;
+            }
+        }
+        @media (max-width: 576px) {
+            .main-container {
+                padding: 1rem 0.75rem 2rem;
+            }
+            .table-card .table-responsive {
+                max-height: 350px;
+            }
+            .stat-box {
+                flex: 1 1 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-4">
-        <h2>Leave Approvals</h2>
-        <div class="row mb-3">
-            <div class="col-md-9"></div>
-            <div class="col-md-3 text-end">
-                <a href="../dashboard.html" class="btn btn-secondary">← Dashboard</a>
+
+    <!-- ═══ NAVBAR ═══ -->
+    <nav class="navbar-custom" id="mainNavbar">
+        <a class="navbar-brand-custom" href="#">
+            <span class="brand-icon"><i class="fa-solid fa-building-columns"></i></span>
+            HRMS
+        </a>
+        <button class="navbar-toggler-custom d-lg-none ms-auto me-2" type="button" id="navbarToggler">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="navbar-collapse-custom d-lg-flex align-items-center ms-auto" id="navbarContent">
+            <div class="nav-links-wrapper me-lg-3" id="navLinksContainer"></div>
+            <button class="btn-logout mt-2 mt-lg-0" id="logoutBtn">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </button>
+        </div>
+    </nav>
+
+    <!-- ═══ MAIN ═══ -->
+    <div class="main-container">
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <h2>
+                <i class="fa-solid fa-calendar-check"></i> Leave Approvals
+                <span class="subtitle">· Review and manage leave requests</span>
+            </h2>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row" id="statsContainer">
+            <div class="stat-box">
+                <div class="stat-icon"><i class="fa-regular fa-clock"></i></div>
+                <div class="stat-detail">
+                    <span class="stat-number" id="pendingCount">0</span>
+                    <span class="stat-label">Pending</span>
+                </div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-icon"><i class="fa-regular fa-circle-check" style="color:#059669;"></i></div>
+                <div class="stat-detail">
+                    <span class="stat-number" id="approvedCount">0</span>
+                    <span class="stat-label">Approved</span>
+                </div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-icon"><i class="fa-regular fa-circle-xmark" style="color:#dc2626;"></i></div>
+                <div class="stat-detail">
+                    <span class="stat-number" id="rejectedCount">0</span>
+                    <span class="stat-label">Rejected</span>
+                </div>
             </div>
         </div>
-        <h4>Pending Requests</h4>
-        <table class="table table-bordered">
-            <thead><tr><th>Employee</th><th>Type</th><th>Dates</th><th>Reason</th><th>Action</th></tr></thead>
-            <tbody id="pendingLeaves"></tbody>
-        </table>
-        <h4>All Leaves</h4>
-        <table class="table table-bordered">
-            <thead><tr><th>Employee</th><th>Type</th><th>Status</th><th>Comment</th></tr></thead>
-            <tbody id="allLeaves"></tbody>
-        </table>
-        <div id="message"></div>
+
+        <!-- Pending Requests -->
+        <div class="table-card">
+            <div class="card-header">
+                <i class="fa-regular fa-hourglass-half"></i> Pending Requests
+                <span class="badge bg-warning text-dark ms-2" id="pendingBadge">0</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-leaves" id="pendingTable">
+                    <thead>
+                        <tr>
+                            <th><i class="fa-regular fa-user"></i> Employee</th>
+                            <th><i class="fa-regular fa-tag"></i> Type</th>
+                            <th><i class="fa-regular fa-calendar"></i> Dates</th>
+                            <th><i class="fa-regular fa-message"></i> Reason</th>
+                            <th><i class="fa-regular fa-gear"></i> Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pendingLeaves"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- All Leaves -->
+        <div class="table-card">
+            <div class="card-header">
+                <i class="fa-regular fa-list"></i> All Leave Records
+                <span class="badge bg-secondary text-white ms-2" id="allBadge">0</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-leaves" id="allTable">
+                    <thead>
+                        <tr>
+                            <th><i class="fa-regular fa-user"></i> Employee</th>
+                            <th><i class="fa-regular fa-tag"></i> Type</th>
+                            <th><i class="fa-regular fa-flag"></i> Status</th>
+                            <th><i class="fa-regular fa-comment"></i> Comment</th>
+                        </tr>
+                    </thead>
+                    <tbody id="allLeaves"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="message" class="mt-3"></div>
     </div>
 
-    <script src="../js/api.js"></script>
+    <!-- ═══ TOAST CONTAINER ═══ -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="../js/api.js">
+    </script>
     <script>
-        async function loadLeaves() {
-            try {
-                // Admin: no user_id -> returns all leaves
-                const data = await apiCall('leaves');
-                // Pending
-                const pending = data.filter(l => l.status === 'pending');
-                const tbody = document.getElementById('pendingLeaves');
-                tbody.innerHTML = '';
-                if (pending.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center">No pending requests</td></tr>';
-                } else {
-                    pending.forEach(l => {
+        (function() {
+            'use strict';
+
+            // ── Navbar & Logout ──
+            document.addEventListener('DOMContentLoaded', () => {
+                const role = localStorage.getItem('role');
+                if (!role) { window.location.href = 'login.html'; return; }
+
+                const navLinksContainer = document.getElementById('navLinksContainer');
+                const links = [
+                    { href: '../dashboard.html', label: 'Dashboard', icon: 'fa-solid fa-gauge-high' },
+                    { href: 'employees.html', label: 'Employees', icon: 'fa-solid fa-users' },
+                    { href: 'attendance.html', label: 'Attendance', icon: 'fa-solid fa-clipboard-user' },
+                    { href: 'leaves.html', label: 'Leave Approvals', icon: 'fa-solid fa-calendar-check' },
+                    { href: 'payroll.html', label: 'Payroll', icon: 'fa-solid fa-indian-rupee-sign' },
+                    { href: 'announcements.html', label: 'Announcements', icon: 'fa-solid fa-bullhorn' },
+                    { href: '../announcements.html', label: 'Live Feed', icon: 'fa-solid fa-rss' }
+                ];
+                links.forEach(link => {
+                    const a = document.createElement('a');
+                    a.className = 'nav-link-custom';
+                    a.href = link.href;
+                    a.innerHTML = `<i class="${link.icon}"></i> ${link.label}`;
+                    if (link.href === 'leaves.html') a.classList.add('active-link');
+                    navLinksContainer.appendChild(a);
+                });
+
+                // Mobile toggler
+                const navbarToggler = document.getElementById('navbarToggler');
+                const navbarContent = document.getElementById('navbarContent');
+                const togglerIcon = navbarToggler.querySelector('i');
+                navbarToggler.addEventListener('click', () => {
+                    const isShown = navbarContent.classList.toggle('show');
+                    togglerIcon.className = isShown ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+                });
+                navLinksContainer.addEventListener('click', (e) => {
+                    if (e.target.closest('a') && navbarContent.classList.contains('show')) {
+                        navbarContent.classList.remove('show');
+                        togglerIcon.className = 'fa-solid fa-bars';
+                    }
+                });
+                window.addEventListener('scroll', () => {
+                    document.getElementById('mainNavbar').classList.toggle('scrolled', window.scrollY > 10);
+                });
+
+                document.getElementById('logoutBtn').addEventListener('click', async () => {
+                    try { await apiCall('logout', 'POST'); } catch (_) {}
+                    localStorage.removeItem('role');
+                    window.location.href = '../login.html';
+                });
+
+                // ── Leave Logic ──
+                loadLeaves();
+
+                // ── Load Leaves ──
+                async function loadLeaves() {
+                    try {
+                        const data = await apiCall('leaves');
+                        renderPending(data);
+                        renderAll(data);
+                        updateStats(data);
+                    } catch (err) {
+                        showToast(err.message, 'danger');
+                    }
+                }
+
+                // ── Render Pending ──
+                function renderPending(data) {
+                    const pending = data.filter(l => l.status === 'pending');
+                    const tbody = document.getElementById('pendingLeaves');
+                    tbody.innerHTML = '';
+                    if (pending.length === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="5">
+                                    <div class="empty-state">
+                                        <i class="fa-regular fa-circle-check"></i>
+                                        <p>All clear! No pending requests.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        document.getElementById('pendingBadge').textContent = '0';
+                        return;
+                    }
+                    document.getElementById('pendingBadge').textContent = pending.length;
+                    pending.forEach((l, idx) => {
                         const tr = document.createElement('tr');
+                        tr.style.animationDelay = `${(idx % 10) * 0.025}s`;
+                        const typeLabel = l.type.charAt(0).toUpperCase() + l.type.slice(1);
                         tr.innerHTML = `
-                            <td>${l.employee_id || l.user_id}</td>
-                            <td>${l.type}</td>
+                            <td><strong>${l.employee_id || l.user_id}</strong></td>
+                            <td>${typeLabel}</td>
                             <td>${l.start_date} → ${l.end_date}</td>
-                            <td>${l.reason || ''}</td>
+                            <td>${l.reason || '—'}</td>
                             <td>
-                                <button class="btn btn-success btn-sm" onclick="approveLeave(${l.id})">Approve</button>
-                                <button class="btn btn-danger btn-sm" onclick="rejectLeave(${l.id})">Reject</button>
-                                <input type="text" id="comment_${l.id}" placeholder="Comment" class="form-control-sm">
+                                <div class="action-group">
+                                    <input type="text" id="comment_${l.id}" class="comment-input" placeholder="Add comment..." />
+                                    <button class="btn-action-leave approve" onclick="approveLeave(${l.id})">
+                                        <i class="fa-regular fa-check"></i> Approve
+                                    </button>
+                                    <button class="btn-action-leave reject" onclick="rejectLeave(${l.id})">
+                                        <i class="fa-regular fa-xmark"></i> Reject
+                                    </button>
+                                </div>
                             </td>
                         `;
                         tbody.appendChild(tr);
                     });
                 }
-                // All leaves
-                const allTbody = document.getElementById('allLeaves');
-                allTbody.innerHTML = '';
-                data.forEach(l => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${l.employee_id || l.user_id}</td>
-                        <td>${l.type}</td>
-                        <td><span class="badge bg-${l.status === 'pending' ? 'warning' : l.status === 'approved' ? 'success' : 'danger'}">${l.status}</span></td>
-                        <td>${l.admin_comment || ''}</td>
+
+                // ── Render All ──
+                function renderAll(data) {
+                    const tbody = document.getElementById('allLeaves');
+                    tbody.innerHTML = '';
+                    if (data.length === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="4">
+                                    <div class="empty-state">
+                                        <i class="fa-regular fa-file-lines"></i>
+                                        <p>No leave records found.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        document.getElementById('allBadge').textContent = '0';
+                        return;
+                    }
+                    document.getElementById('allBadge').textContent = data.length;
+                    data.forEach((l, idx) => {
+                        const tr = document.createElement('tr');
+                        tr.style.animationDelay = `${(idx % 10) * 0.025}s`;
+                        const statusClass = l.status || 'pending';
+                        const typeLabel = l.type.charAt(0).toUpperCase() + l.type.slice(1);
+                        tr.innerHTML = `
+                            <td><strong>${l.employee_id || l.user_id}</strong></td>
+                            <td>${typeLabel}</td>
+                            <td>
+                                <span class="status-badge ${statusClass}">
+                                    <span class="dot"></span>
+                                    ${statusClass}
+                                </span>
+                            </td>
+                            <td>${l.admin_comment || '—'}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+
+                // ── Update Stats ──
+                function updateStats(data) {
+                    const pending = data.filter(l => l.status === 'pending').length;
+                    const approved = data.filter(l => l.status === 'approved').length;
+                    const rejected = data.filter(l => l.status === 'rejected').length;
+                    document.getElementById('pendingCount').textContent = pending;
+                    document.getElementById('approvedCount').textContent = approved;
+                    document.getElementById('rejectedCount').textContent = rejected;
+                }
+
+                // ── Approve ──
+                window.approveLeave = async function(id) {
+                    const comment = document.getElementById(`comment_${id}`).value.trim();
+                    try {
+                        await apiCall(`leaves/${id}`, 'PUT', { status: 'approved', admin_comment: comment });
+                        showToast('Leave approved', 'success');
+                        loadLeaves();
+                    } catch (err) {
+                        showToast(err.message, 'danger');
+                    }
+                };
+
+                // ── Reject ──
+                window.rejectLeave = async function(id) {
+                    const comment = document.getElementById(`comment_${id}`).value.trim();
+                    try {
+                        await apiCall(`leaves/${id}`, 'PUT', { status: 'rejected', admin_comment: comment });
+                        showToast('Leave rejected', 'success');
+                        loadLeaves();
+                    } catch (err) {
+                        showToast(err.message, 'danger');
+                    }
+                };
+
+                // ── Toast ──
+                function showToast(message, type = 'success') {
+                    const container = document.getElementById('toastContainer');
+                    const toast = document.createElement('div');
+                    toast.className = `toast-custom ${type}`;
+                    const iconMap = {
+                        success: 'fa-regular fa-circle-check',
+                        danger: 'fa-regular fa-circle-xmark',
+                        warning: 'fa-regular fa-triangle-exclamation',
+                        info: 'fa-regular fa-circle-info'
+                    };
+                    toast.innerHTML = `
+                        <span class="toast-icon"><i class="${iconMap[type] || iconMap.info}"></i></span>
+                        <span>${message}</span>
+                        <button class="toast-close" onclick="this.closest('.toast-custom').remove()">&times;</button>
                     `;
-                    allTbody.appendChild(tr);
-                });
-            } catch (err) {
-                document.getElementById('message').innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
-            }
-        }
-
-        async function approveLeave(id) {
-            const comment = document.getElementById(`comment_${id}`).value;
-            try {
-                await apiCall(`leaves/${id}`, 'PUT', { status: 'approved', admin_comment: comment });
-                loadLeaves();
-                document.getElementById('message').innerHTML = '<div class="alert alert-success">Approved</div>';
-            } catch (err) {
-                document.getElementById('message').innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
-            }
-        }
-
-        async function rejectLeave(id) {
-            const comment = document.getElementById(`comment_${id}`).value;
-            try {
-                await apiCall(`leaves/${id}`, 'PUT', { status: 'rejected', admin_comment: comment });
-                loadLeaves();
-                document.getElementById('message').innerHTML = '<div class="alert alert-success">Rejected</div>';
-            } catch (err) {
-                document.getElementById('message').innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
-            }
-        }
-
-        loadLeaves();
+                    container.appendChild(toast);
+                    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 4500);
+                }
+            });
+        })();
     </script>
 </body>
 </html>
