@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Payroll</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .toast { transition: opacity 0.3s; }
+        .payroll-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans antialiased">
+
+    <!-- ===== TOAST ===== -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="bg-white shadow px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+        <div class="flex items-center gap-4">
+            <a href="dashboard.html" class="text-xl font-bold text-blue-700 hover:text-blue-800">← HRMS</a>
+            <span class="text-sm bg-gray-200 px-3 py-1 rounded-full">Payroll</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <span id="userName" class="text-sm font-medium"></span>
+            <button onclick="logout()" class="text-sm bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200">Logout</button>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto p-6">
+        <!-- Page Header -->
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">💰 My Payroll</h1>
+            <p class="text-gray-500">View your salary details and payment history</p>
+        </div>
+
+        <!-- Month/Year Selector -->
+        <div class="bg-white p-4 rounded-xl shadow mb-6">
+            <div class="flex flex-wrap items-center gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Select Month</label>
+                    <select id="monthSelect" class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Select Year</label>
+                    <select id="yearSelect" class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                        <!-- Will be populated by JS -->
+                    </select>
+                </div>
+                <div class="self-end">
+                    <button onclick="loadPayroll()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition">View</button>
+                    <button onclick="loadCurrentMonth()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg transition ml-2">Current Month</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payroll Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6" id="summaryCards">
+            <div class="bg-white p-6 rounded-xl shadow border-l-4 border-blue-500">
+                <p class="text-gray-500 text-sm">Basic Salary</p>
+                <p class="text-2xl font-bold text-gray-800" id="summaryBasic">$0</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow border-l-4 border-green-500">
+                <p class="text-gray-500 text-sm">Allowances</p>
+                <p class="text-2xl font-bold text-gray-800" id="summaryAllowance">$0</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow border-l-4 border-red-500">
+                <p class="text-gray-500 text-sm">Deductions</p>
+                <p class="text-2xl font-bold text-gray-800" id="summaryDeduction">$0</p>
+            </div>
+        </div>
+
+        <!-- Net Salary Card -->
+        <div class="payroll-card rounded-xl shadow-lg p-8 mb-6 text-white">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-white/80 text-sm">Net Salary for <span id="payrollMonthYear">Current Month</span></p>
+                    <p class="text-4xl font-bold" id="netSalary">$0.00</p>
+                </div>
+                <div class="bg-white/20 p-4 rounded-full">
+                    <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-4 grid grid-cols-3 gap-4 text-center">
+                <div class="bg-white/10 rounded-lg p-2">
+                    <p class="text-xs text-white/80">Basic</p>
+                    <p class="font-semibold" id="netBasic">$0</p>
+                </div>
+                <div class="bg-white/10 rounded-lg p-2">
+                    <p class="text-xs text-white/80">Allowance</p>
+                    <p class="font-semibold" id="netAllowance">$0</p>
+                </div>
+                <div class="bg-white/10 rounded-lg p-2">
+                    <p class="text-xs text-white/80">Deduction</p>
+                    <p class="font-semibold" id="netDeduction">$0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Breakdown -->
+        <div class="bg-white rounded-xl shadow overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800">📊 Detailed Breakdown</h3>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    <div class="flex justify-between py-2 border-b border-gray-100">
+                        <span class="text-gray-600">Employee ID</span>
+                        <span class="font-medium" id="detailEmpId">—</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-100">
+                        <span class="text-gray-600">Employee Name</span>
+                        <span class="font-medium" id="detailName">—</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-100">
+                        <span class="text-gray-600">Department</span>
+                        <span class="font-medium" id="detailDept">—</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-100">
+                        <span class="text-gray-600">Basic Salary</span>
+                        <span class="font-medium" id="detailBasic">$0</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-100">
+                        <span class="text-gray-600">House Rent Allowance</span>
+                        <span class="font-medium" id="detailHRA">$0</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-100">
+                        <span class="text-gray-600">Medical Allowance</span>
+                        <span class="font-medium" id="detailMedical">$0</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-100">
+                        <span class="text-gray-600">Transport Allowance</span>
+                        <span class="font-medium" id="detailTransport">$0</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-100">
+                        <span class="text-gray-600">Other Allowances</span>
+                        <span class="font-medium" id="detailOtherAllowance">$0</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-100">
+                        <span class="text-gray-600">Total Allowances</span>
+                        <span class="font-medium text-green-600" id="detailTotalAllowance">$0</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-100">
+                        <span class="text-gray-600">Tax Deduction</span>
+                        <span class="font-medium" id="detailTax">$0</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-100">
+                        <span class="text-gray-600">Insurance Deduction</span>
+                        <span class="font-medium" id="detailInsurance">$0</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-100">
+                        <span class="text-gray-600">Other Deductions</span>
+                        <span class="font-medium" id="detailOtherDeduction">$0</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-100">
+                        <span class="text-gray-600">Total Deductions</span>
+                        <span class="font-medium text-red-600" id="detailTotalDeduction">$0</span>
+                    </div>
+                    <div class="flex justify-between py-3 bg-blue-50 rounded-lg px-4 -mx-4">
+                        <span class="text-lg font-bold text-gray-800">Net Salary</span>
+                        <span class="text-lg font-bold text-blue-600" id="detailNet">$0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payroll History Table -->
+        <div class="bg-white rounded-xl shadow overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-800">📋 Payroll History</h3>
+                <span class="text-sm text-gray-500" id="historyCount">Showing 0 records</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-gray-50 border-b">
+                        <tr>
+                            <th class="px-6 py-3 font-semibold text-gray-600">Month</th>
+                            <th class="px-6 py-3 font-semibold text-gray-600">Year</th>
+                            <th class="px-6 py-3 font-semibold text-gray-600">Basic</th>
+                            <th class="px-6 py-3 font-semibold text-gray-600">Allowance</th>
+                            <th class="px-6 py-3 font-semibold text-gray-600">Deduction</th>
+                            <th class="px-6 py-3 font-semibold text-gray-600">Net Salary</th>
+                            <th class="px-6 py-3 font-semibold text-gray-600">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="payrollHistoryBody">
+                        <tr>
+                            <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                                No payroll records found
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  CONFIGURATION
+        // ============================================================
+        const API_BASE = '../../backend/api/';
+
+        // ============================================================
+        //  TOAST
+        // ============================================================
+        function showToast(msg, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast px-6 py-3 rounded shadow-lg text-white ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
+            toast.textContent = msg;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+
+        // ============================================================
+        //  API HELPER
+        // ============================================================
+        async function apiFetch(endpoint, options = {}) {
+            const url = API_BASE + endpoint;
+            const response = await fetch(url, {
+                ...options,
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(options.headers || {})
+                },
+                body: options.body ? JSON.stringify(options.body) : undefined
+            });
+            let data;
+            try { data = await response.json(); } catch (e) { data = { error: 'Invalid response' }; }
+            if (!response.ok) {
+                throw new Error(data.message || data.error || `HTTP ${response.status}`);
+            }
+            return data;
+        }
+
+        // ============================================================
+        //  AUTH STATE
+        // ============================================================
+        let currentUser = null;
+        let allPayrollHistory = [];
+
+        async function loadSession() {
+            try {
+                const data = await apiFetch('auth.php?action=check');
+                if (data.success && data.data && data.data.user_id) {
+                    const userData = await apiFetch('employees.php?id=' + data.data.user_id);
+                    if (userData.success) {
+                        currentUser = userData.data;
+                        document.getElementById('userName').textContent = currentUser.name;
+                        return true;
+                    }
+                }
+            } catch (e) {}
+            return false;
+        }
+
+        // ============================================================
+        //  LOGOUT
+        // ============================================================
+        async function logout() {
+            try {
+                await apiFetch('auth.php?action=logout');
+            } catch (e) {}
+            window.location.href = '../login.html';
+        }
+
+        // ============================================================
+        //  PAYROLL FUNCTIONS
+        // ============================================================
+
+        // Populate year selector
+        function populateYears() {
+            const yearSelect = document.getElementById('yearSelect');
+            const currentYear = new Date().getFullYear();
+            yearSelect.innerHTML = '';
+            for (let y = currentYear - 5; y <= currentYear + 1; y++) {
+                const option = document.createElement('option');
+                option.value = y;
+                option.textContent = y;
+                if (y === currentYear) option.selected = true;
+                yearSelect.appendChild(option);
+            }
+        }
+
+        // Set current month
+        function loadCurrentMonth() {
+            const now = new Date();
+            document.getElementById('monthSelect').value = now.getMonth() + 1;
+            document.getElementById('yearSelect').value = now.getFullYear();
+            loadPayroll();
+        }
+
+        // Main load function
+        async function loadPayroll() {
+            const month = document.getElementById('monthSelect').value;
+            const year = document.getElementById('yearSelect').value;
+
+            if (!currentUser) {
+                showToast('Please login first', 'error');
+                return;
+            }
+
+            try {
+                // Load specific month payroll
+                const resp = await apiFetch(`payroll.php?month=${month}&year=${year}`);
+                const payroll = resp.data || {};
+
+                if (resp.success) {
+                    displayPayroll(payroll, month, year);
+                    showToast(`Payroll loaded for ${getMonthName(month)} ${year}`, 'success');
+                } else {
+                    // No payroll found
+                    clearPayrollDisplay();
+                    showToast('No payroll record found for this month', 'error');
+                }
+
+                // Load history
+                await loadPayrollHistory();
+
+            } catch (err) {
+                showToast('Failed to load payroll: ' + err.message, 'error');
+                clearPayrollDisplay();
+            }
+        }
+
+        function displayPayroll(payroll, month, year) {
+            const monthName = getMonthName(month);
+
+            // Summary cards
+            document.getElementById('summaryBasic').textContent = '$' + formatNumber(payroll.basic || 0);
+            document.getElementById('summaryAllowance').textContent = '$' + formatNumber(payroll.allowance || 0);
+            document.getElementById('summaryDeduction').textContent = '$' + formatNumber(payroll.deduction || 0);
+
+            // Net salary card
+            const net = (payroll.basic || 0) + (payroll.allowance || 0) - (payroll.deduction || 0);
+            document.getElementById('netSalary').textContent = '$' + formatNumber(net);
+            document.getElementById('payrollMonthYear').textContent = `${monthName} ${year}`;
+            document.getElementById('netBasic').textContent = '$' + formatNumber(payroll.basic || 0);
+            document.getElementById('netAllowance').textContent = '$' + formatNumber(payroll.allowance || 0);
+            document.getElementById('netDeduction').textContent = '$' + formatNumber(payroll.deduction || 0);
+
+            // Detailed breakdown
+            document.getElementById('detailEmpId').textContent = currentUser.employee_id || currentUser.empId || '—';
+            document.getElementById('detailName').textContent = currentUser.name || '—';
+            document.getElementById('detailDept').textContent = currentUser.department || '—';
+
+            // Allowance breakdown (if more detailed data available)
+            const allowanceDetails = payroll.allowance_details || {
+                hra: Math.round((payroll.allowance || 0) * 0.4),
+                medical: Math.round((payroll.allowance || 0) * 0.3),
+                transport: Math.round((payroll.allowance || 0) * 0.2),
+                other: Math.round((payroll.allowance || 0) * 0.1)
+            };
+
+            document.getElementById('detailBasic').textContent = '$' + formatNumber(payroll.basic || 0);
+            document.getElementById('detailHRA').textContent = '$' + formatNumber(allowanceDetails.hra || 0);
+            document.getElementById('detailMedical').textContent = '$' + formatNumber(allowanceDetails.medical || 0);
+            document.getElementById('detailTransport').textContent = '$' + formatNumber(allowanceDetails.transport || 0);
+            document.getElementById('detailOtherAllowance').textContent = '$' + formatNumber(allowanceDetails.other || 0);
+            document.getElementById('detailTotalAllowance').textContent = '$' + formatNumber(payroll.allowance || 0);
+
+            // Deduction breakdown
+            const deductionDetails = payroll.deduction_details || {
+                tax: Math.round((payroll.deduction || 0) * 0.6),
+                insurance: Math.round((payroll.deduction || 0) * 0.3),
+                other: Math.round((payroll.deduction || 0) * 0.1)
+            };
+
+            document.getElementById('detailTax').textContent = '$' + formatNumber(deductionDetails.tax || 0);
+            document.getElementById('detailInsurance').textContent = '$' + formatNumber(deductionDetails.insurance || 0);
+            document.getElementById('detailOtherDeduction').textContent = '$' + formatNumber(deductionDetails.other || 0);
+            document.getElementById('detailTotalDeduction').textContent = '$' + formatNumber(payroll.deduction || 0);
+            document.getElementById('detailNet').textContent = '$' + formatNumber(net);
+        }
+
+        function clearPayrollDisplay() {
+            document.getElementById('summaryBasic').textContent = '$0';
+            document.getElementById('summaryAllowance').textContent = '$0';
+            document.getElementById('summaryDeduction').textContent = '$0';
+            document.getElementById('netSalary').textContent = '$0.00';
+            document.getElementById('netBasic').textContent = '$0';
+            document.getElementById('netAllowance').textContent = '$0';
+            document.getElementById('netDeduction').textContent = '$0';
+
+            document.getElementById('detailBasic').textContent = '$0';
+            document.getElementById('detailHRA').textContent = '$0';
+            document.getElementById('detailMedical').textContent = '$0';
+            document.getElementById('detailTransport').textContent = '$0';
+            document.getElementById('detailOtherAllowance').textContent = '$0';
+            document.getElementById('detailTotalAllowance').textContent = '$0';
+            document.getElementById('detailTax').textContent = '$0';
+            document.getElementById('detailInsurance').textContent = '$0';
+            document.getElementById('detailOtherDeduction').textContent = '$0';
+            document.getElementById('detailTotalDeduction').textContent = '$0';
+            document.getElementById('detailNet').textContent = '$0';
+        }
+
+        async function loadPayrollHistory() {
+            try {
+                // Get all months for current year
+                const year = document.getElementById('yearSelect').value;
+                const history = [];
+
+                // Try to fetch each month
+                for (let m = 1; m <= 12; m++) {
+                    try {
+                        const resp = await apiFetch(`payroll.php?month=${m}&year=${year}`);
+                        if (resp.success && resp.data) {
+                            history.push({
+                                ...resp.data,
+                                month: m,
+                                year: parseInt(year),
+                                monthName: getMonthName(m)
+                            });
+                        }
+                    } catch (e) {
+                        // Month has no payroll, skip
+                    }
+                }
+
+                // Sort by month descending
+                history.sort((a, b) => b.month - a.month);
+                allPayrollHistory = history;
+
+                renderPayrollHistory(history);
+                document.getElementById('historyCount').textContent = `Showing ${history.length} records`;
+
+            } catch (err) {
+                document.getElementById('payrollHistoryBody').innerHTML = `
+                    <tr><td colspan="7" class="px-6 py-8 text-center text-gray-500">Error loading history</td></tr>
+                `;
+            }
+        }
+
+        function renderPayrollHistory(history) {
+            const tbody = document.getElementById('payrollHistoryBody');
+
+            if (history.length === 0) {
+                tbody.innerHTML = `
+                    <tr><td colspan="7" class="px-6 py-8 text-center text-gray-500">No payroll history found</td></tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = history.map(p => {
+                const net = (p.basic || 0) + (p.allowance || 0) - (p.deduction || 0);
+                const status = p.status || 'Paid';
+                const statusColor = status === 'Paid' ? 'text-green-600' : 'text-yellow-600';
+                return `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-6 py-3">${p.monthName}</td>
+                        <td class="px-6 py-3">${p.year}</td>
+                        <td class="px-6 py-3">$${formatNumber(p.basic || 0)}</td>
+                        <td class="px-6 py-3">$${formatNumber(p.allowance || 0)}</td>
+                        <td class="px-6 py-3">$${formatNumber(p.deduction || 0)}</td>
+                        <td class="px-6 py-3 font-semibold text-blue-600">$${formatNumber(net)}</td>
+                        <td class="px-6 py-3">
+                            <span class="px-2 py-1 rounded-full text-xs font-medium ${statusColor} bg-opacity-10">
+                                ${status}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // ============================================================
+        //  HELPERS
+        // ============================================================
+        function getMonthName(month) {
+            const names = ['January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'
+            ];
+            return names[month - 1] || month;
+        }
+
+        function formatNumber(num) {
+            return Number(num).toFixed(2);
+        }
+
+        // ============================================================
+        //  INIT
+        // ============================================================
+        (async function init() {
+            const ok = await loadSession();
+            if (!ok) {
+                window.location.href = '../login.html';
+                return;
+            }
+
+            populateYears();
+            loadCurrentMonth();
+
+            // Auto-load when month/year changes
+            document.getElementById('monthSelect').addEventListener('change', loadPayroll);
+            document.getElementById('yearSelect').addEventListener('change', loadPayroll);
+        })();
+    </script>
+
+</body>
+</html>
