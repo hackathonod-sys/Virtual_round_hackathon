@@ -1,395 +1,2054 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HRMS – Admin Dashboard</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .section { display: none; }
-    .section.active { display: block; }
-    .toast { transition: opacity 0.3s; }
-    .capitalize { text-transform: capitalize; }
-  </style>
-</head>
-<body class="bg-gray-50 font-sans antialiased">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HRMS – Professional Dashboard</title>
+    <!-- Tailwind + Font Awesome -->
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <!-- Google Font: Poppins (replaces Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        /* ── Reset & Base ── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f4f6f9;
+            color: #0f172a;
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background 0.3s, color 0.3s;
+        }
+        body.dark {
+            background: #111827;
+            color: #e2e8f0;
+        }
 
-  <!-- ===== TOAST ===== -->
-  <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 8px;
+        }
+        body.dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
 
-  <!-- ===== NAVBAR ===== -->
-  <nav class="bg-white shadow px-4 py-3 flex items-center justify-between sticky top-0 z-40">
-    <div class="flex items-center gap-4">
-      <span class="text-xl font-bold text-blue-700">HRMS</span>
-      <span id="roleBadge" class="text-sm bg-gray-200 px-3 py-1 rounded-full"></span>
-    </div>
-    <div class="flex items-center gap-3">
-      <span id="userName" class="text-sm font-medium"></span>
-      <button onclick="logout()" class="text-sm bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200">Logout</button>
-    </div>
-  </nav>
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 270px;
+            min-height: 100vh;
+            background: #0f172a;
+            color: #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 100;
+            transition: transform 0.3s ease, background 0.3s;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #334155 #0f172a;
+        }
+        body.dark .sidebar {
+            background: #1e293b;
+        }
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        .sidebar-brand {
+            padding: 1.5rem 1.25rem 1rem;
+            border-bottom: 1px solid #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        body.dark .sidebar-brand {
+            border-bottom-color: #334155;
+        }
+        .sidebar-brand .brand-icon {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .sidebar-brand h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            color: #fff;
+        }
+        .sidebar-brand small {
+            font-size: 0.6rem;
+            font-weight: 400;
+            color: #94a3b8;
+            display: block;
+            margin-top: -2px;
+        }
+        .sidebar-nav {
+            flex: 1;
+            padding: 1.25rem 0.75rem;
+        }
+        .sidebar-nav .nav-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #64748b;
+            padding: 0.5rem 0.75rem 0.25rem;
+            font-weight: 600;
+        }
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 0.9rem;
+            border-radius: 10px;
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.15s;
+            cursor: pointer;
+            margin-bottom: 2px;
+            position: relative;
+        }
+        .sidebar-nav a i {
+            width: 20px;
+            font-size: 1rem;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .sidebar-nav a:hover {
+            background: #1e293b;
+            color: #fff;
+        }
+        .sidebar-nav a.active {
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        .sidebar-nav a .badge-nav {
+            margin-left: auto;
+            background: #ef4444;
+            color: #fff;
+            font-size: 0.6rem;
+            font-weight: 600;
+            padding: 0.1rem 0.55rem;
+            border-radius: 999px;
+        }
+        body.dark .sidebar-nav a:hover {
+            background: #334155;
+        }
+        .sidebar-footer {
+            padding: 1rem 0.75rem;
+            border-top: 1px solid #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        body.dark .sidebar-footer {
+            border-top-color: #334155;
+        }
+        .sidebar-footer .avatar-sm {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #fff;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+        .sidebar-footer .user-meta {
+            flex: 1;
+            min-width: 0;
+        }
+        .sidebar-footer .user-meta .name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sidebar-footer .user-meta .role {
+            font-size: 0.65rem;
+            color: #94a3b8;
+            text-transform: capitalize;
+        }
+        .sidebar-footer .logout-btn {
+            color: #94a3b8;
+            transition: color 0.15s;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .sidebar-footer .logout-btn:hover {
+            color: #ef4444;
+        }
 
-  <!-- ============================================ -->
-  <!-- ===== ADMIN DASHBOARD (only admin sections) ===== -->
-  <!-- ============================================ -->
-  <div id="adminApp" class="section active">
+        /* ── Main Content ── */
+        .main-wrap {
+            margin-left: 270px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s;
+        }
 
-    <!-- Admin Dashboard Home -->
-    <div id="adminDashboard" class="section active p-6 max-w-6xl mx-auto">
-      <h1 class="text-2xl font-bold text-gray-800 mb-2">🛠️ Admin Dashboard</h1>
-      <p class="text-gray-500 mb-6">Manage employees, attendance, and leave approvals</p>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div onclick="showAdminSection('adminEmployees')" class="bg-white p-6 rounded-xl shadow hover:shadow-lg cursor-pointer transition text-center">
-          <div class="text-4xl mb-2">👥</div>
-          <h3 class="font-semibold">Employee List</h3>
-        </div>
-        <div onclick="showAdminSection('adminAttendance')" class="bg-white p-6 rounded-xl shadow hover:shadow-lg cursor-pointer transition text-center">
-          <div class="text-4xl mb-2">📊</div>
-          <h3 class="font-semibold">All Attendance</h3>
-        </div>
-        <div onclick="showAdminSection('adminLeave')" class="bg-white p-6 rounded-xl shadow hover:shadow-lg cursor-pointer transition text-center">
-          <div class="text-4xl mb-2">✅</div>
-          <h3 class="font-semibold">Leave Approvals</h3>
-        </div>
-      </div>
-    </div>
+        /* ── Top Bar ── */
+        .topbar {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 0.75rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            min-height: 68px;
+            transition: background 0.3s, border-color 0.3s;
+        }
+        body.dark .topbar {
+            background: rgba(30, 41, 59, 0.8);
+            border-bottom-color: rgba(51, 65, 85, 0.5);
+        }
+        .topbar .page-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #0f172a;
+        }
+        body.dark .topbar .page-title {
+            color: #f1f5f9;
+        }
+        .topbar .page-title span {
+            color: #64748b;
+            font-weight: 400;
+            font-size: 0.85rem;
+        }
+        .topbar .right-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+        .topbar .right-actions .icon-btn {
+            color: #64748b;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: color 0.15s;
+            position: relative;
+        }
+        .topbar .right-actions .icon-btn:hover {
+            color: #0f172a;
+        }
+        body.dark .topbar .right-actions .icon-btn:hover {
+            color: #e2e8f0;
+        }
+        .topbar .right-actions .icon-btn .dot {
+            position: absolute;
+            top: -2px;
+            right: -4px;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid #fff;
+        }
+        body.dark .topbar .right-actions .icon-btn .dot {
+            border-color: #1e293b;
+        }
+        .topbar .right-actions .profile-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem 0.25rem 0.25rem;
+            border-radius: 999px;
+            background: #f1f5f9;
+            transition: background 0.15s;
+        }
+        body.dark .topbar .right-actions .profile-pill {
+            background: #334155;
+        }
+        .topbar .right-actions .profile-pill:hover {
+            background: #e2e8f0;
+        }
+        body.dark .topbar .right-actions .profile-pill:hover {
+            background: #475569;
+        }
+        .topbar .right-actions .profile-pill .av {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        .topbar .right-actions .profile-pill .name-label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #0f172a;
+        }
+        body.dark .topbar .right-actions .profile-pill .name-label {
+            color: #e2e8f0;
+        }
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            color: #0f172a;
+            cursor: pointer;
+            padding: 4px;
+        }
+        body.dark .hamburger {
+            color: #e2e8f0;
+        }
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(2px);
+            z-index: 99;
+        }
 
-    <!-- Admin Employee List -->
-    <div id="adminEmployees" class="section p-6 max-w-6xl mx-auto">
-      <div class="flex items-center gap-4 mb-4">
-        <button onclick="showAdminSection('adminDashboard')" class="text-blue-600 hover:underline">← Back</button>
-        <h2 class="text-2xl font-bold">All Employees</h2>
-      </div>
-      <div class="bg-white rounded-xl shadow overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-gray-50 border-b">
-            <tr><th class="p-3">ID</th><th>Name</th><th>Email</th><th>Role</th><th>Department</th><th>Phone</th><th>Action</th></tr>
-          </thead>
-          <tbody id="adminEmployeeTable"></tbody>
-        </table>
-      </div>
-      <!-- Edit Modal -->
-      <div id="editModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-xl shadow-lg w-96">
-          <h3 class="text-xl font-bold mb-4">Edit Employee</h3>
-          <form id="editEmployeeForm">
-            <input type="hidden" id="editUserId" />
-            <div class="mb-3">
-              <label class="block text-sm">Phone</label>
-              <input type="text" id="editPhoneAdmin" class="w-full border p-2 rounded" />
-            </div>
-            <div class="mb-3">
-              <label class="block text-sm">Address</label>
-              <input type="text" id="editAddressAdmin" class="w-full border p-2 rounded" />
-            </div>
-            <div class="flex gap-2">
-              <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Save</button>
-              <button type="button" onclick="closeEditModal()" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+        /* ── Content ── */
+        .content {
+            padding: 1.75rem 2rem 2.5rem;
+            flex: 1;
+        }
 
-    <!-- Admin All Attendance -->
-    <div id="adminAttendance" class="section p-6 max-w-6xl mx-auto">
-      <div class="flex items-center gap-4 mb-4">
-        <button onclick="showAdminSection('adminDashboard')" class="text-blue-600 hover:underline">← Back</button>
-        <h2 class="text-2xl font-bold">All Attendance Records</h2>
-      </div>
-      <div class="bg-white rounded-xl shadow overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-gray-50 border-b">
-            <tr><th class="p-3">Employee</th><th>Date</th><th>Status</th></tr>
-          </thead>
-          <tbody id="adminAttendanceTable"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Admin Leave Approvals -->
-    <div id="adminLeave" class="section p-6 max-w-6xl mx-auto">
-      <div class="flex items-center gap-4 mb-4">
-        <button onclick="showAdminSection('adminDashboard')" class="text-blue-600 hover:underline">← Back</button>
-        <h2 class="text-2xl font-bold">Leave Approvals</h2>
-      </div>
-      <div class="bg-white rounded-xl shadow overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-gray-50 border-b">
-            <tr><th>Employee</th><th>Type</th><th>Start</th><th>End</th><th>Status</th><th>Comments</th><th>Actions</th></tr>
-          </thead>
-          <tbody id="adminLeaveTable"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // ============================================================
-    //  CONFIGURATION – relative path from admin/ folder to backend
-    // ============================================================
-    const API_BASE = '../../backend/api/';
-
-    // ============================================================
-    //  TOAST
-    // ============================================================
-    function showToast(msg, type = 'success') {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      toast.className = `toast px-6 py-3 rounded shadow-lg text-white ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
-      toast.textContent = msg;
-      container.appendChild(toast);
-      setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => toast.remove(), 400);
-      }, 3000);
-    }
-
-    // ============================================================
-    //  API HELPER
-    // ============================================================
-    async function apiFetch(endpoint, options = {}) {
-      const url = API_BASE + endpoint;
-      const response = await fetch(url, {
-        ...options,
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(options.headers || {})
-        },
-        body: options.body ? JSON.stringify(options.body) : undefined
-      });
-      let data;
-      try { data = await response.json(); } catch (e) { data = { error: 'Invalid response' }; }
-      if (!response.ok) {
-        throw new Error(data.message || data.error || `HTTP ${response.status}`);
-      }
-      return data;
-    }
-
-    // ============================================================
-    //  AUTH STATE
-    // ============================================================
-    let currentUser = null;
-
-    async function loadSession() {
-      try {
-        const data = await apiFetch('auth.php?action=check');
-        if (data.success && data.data && data.data.user_id) {
-          const userData = await apiFetch('employees.php?id=' + data.data.user_id);
-          if (userData.success) {
-            currentUser = userData.data;
-            // Ensure this is an admin
-            if (currentUser.role !== 'admin' && currentUser.role !== 'hr') {
-              // Not admin – redirect to employee dashboard or login
-              window.location.href = '../employee/dashboard.html';
-              return false;
+        /* ── Section Toggle ── */
+        .section {
+            display: none;
+            animation: fadeUp 0.3s ease;
+        }
+        .section.active {
+            display: block;
+        }
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
             }
-            return true;
-          }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        return false;
-      } catch (e) {
-        console.warn('Session load error:', e);
-        return false;
-      }
-    }
 
-    // ============================================================
-    //  UI HELPERS
-    // ============================================================
-    function showAdminSection(sectionId) {
-      document.querySelectorAll('#adminApp .section').forEach(el => el.classList.remove('active'));
-      document.getElementById(sectionId).classList.add('active');
-    }
-
-    function renderApp() {
-      const roleBadge = document.getElementById('roleBadge');
-      const userName = document.getElementById('userName');
-
-      if (!currentUser) {
-        window.location.href = '../login.html?loop_break=1';
-        return;
-      }
-
-      roleBadge.textContent = currentUser.role.toUpperCase();
-      userName.textContent = currentUser.name;
-
-      // Show admin dashboard
-      document.getElementById('adminApp').classList.add('active');
-      showAdminSection('adminDashboard');
-      renderAdminEmployees();
-      renderAdminAttendance();
-      renderAdminLeaves();
-    }
-
-    // ============================================================
-    //  LOGOUT
-    // ============================================================
-    async function logout() {
-      try {
-        await apiFetch('auth.php?action=logout');
-      } catch (e) {}
-      window.location.href = '../login.html';
-    }
-
-    // ============================================================
-    //  ADMIN: Employees
-    // ============================================================
-    async function renderAdminEmployees() {
-      try {
-        const resp = await apiFetch('employees.php');
-        const employees = resp.data.data || [];
-        const tbody = document.getElementById('adminEmployeeTable');
-        if (employees.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="7" class="py-2 text-gray-500">No employees</td></tr>';
-          return;
+        /* ── Cards ── */
+        .stat-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.25rem 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
+            border: 1px solid #eef2f6;
+            transition: all 0.25s;
+            position: relative;
+            overflow: hidden;
         }
-        tbody.innerHTML = employees.map(u => `
-          <tr class="border-b">
-            <td class="p-3">${u.employee_id || u.empId}</td>
-            <td>${u.name}</td>
-            <td>${u.email}</td>
-            <td><span class="capitalize">${u.role}</span></td>
-            <td>${u.department || '—'}</td>
-            <td>${u.phone || '—'}</td>
-            <td>
-              <button onclick="openEditModal(${u.id})" class="bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600">Edit</button>
-            </td>
-          </tr>
-        `).join('');
-      } catch (err) {
-        showToast('Failed to load employees: ' + err.message, 'error');
-      }
-    }
+        body.dark .stat-card {
+            background: #1e293b;
+            border-color: #334155;
+        }
+        .stat-card:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+            transform: translateY(-3px);
+        }
+        .stat-card .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        .stat-card .stat-number {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+        }
+        body.dark .stat-card .stat-number {
+            color: #f1f5f9;
+        }
+        .stat-card .stat-label {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+        body.dark .stat-card .stat-label {
+            color: #94a3b8;
+        }
 
-    let editingUserId = null;
+        .card-panel {
+            background: #fff;
+            border-radius: 16px;
+            border: 1px solid #eef2f6;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            transition: background 0.3s, border-color 0.3s;
+        }
+        body.dark .card-panel {
+            background: #1e293b;
+            border-color: #334155;
+        }
+        .card-panel .card-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #eef2f6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        body.dark .card-panel .card-header {
+            border-bottom-color: #334155;
+        }
+        .card-panel .card-header h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #0f172a;
+        }
+        body.dark .card-panel .card-header h3 {
+            color: #f1f5f9;
+        }
+        .card-panel .card-body {
+            padding: 1.25rem 1.5rem;
+        }
 
-    function openEditModal(userId) {
-      editingUserId = userId;
-      document.getElementById('editUserId').value = userId;
-      apiFetch(`employees.php?id=${userId}`).then(resp => {
-        const u = resp.data;
-        document.getElementById('editPhoneAdmin').value = u.phone || '';
-        document.getElementById('editAddressAdmin').value = u.address || '';
-      }).catch(err => showToast(err.message, 'error'));
-      document.getElementById('editModal').classList.remove('hidden');
-    }
+        /* ── Tables ── */
+        .table-wrap {
+            overflow-x: auto;
+        }
+        .table-wrap table {
+            width: 100%;
+            font-size: 0.875rem;
+            border-collapse: collapse;
+        }
+        .table-wrap table thead {
+            background: #f8fafc;
+        }
+        body.dark .table-wrap table thead {
+            background: #0f172a;
+        }
+        .table-wrap table thead th {
+            padding: 0.6rem 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: #475569;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        body.dark .table-wrap table thead th {
+            color: #94a3b8;
+            border-bottom-color: #334155;
+        }
+        .table-wrap table tbody td {
+            padding: 0.6rem 0.75rem;
+            border-bottom: 1px solid #f1f5f9;
+            color: #1e293b;
+        }
+        body.dark .table-wrap table tbody td {
+            color: #e2e8f0;
+            border-bottom-color: #334155;
+        }
+        .table-wrap table tbody tr:hover {
+            background: #f8fafc;
+        }
+        body.dark .table-wrap table tbody tr:hover {
+            background: #0f172a;
+        }
 
-    function closeEditModal() {
-      document.getElementById('editModal').classList.add('hidden');
-      editingUserId = null;
-    }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.15rem 0.7rem;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .status-badge.present {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .status-badge.absent {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .status-badge.halfday {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+        .status-badge.leave {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .status-badge.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .status-badge.approved {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .status-badge.rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        body.dark .status-badge.present {
+            background: #166534;
+            color: #dcfce7;
+        }
+        body.dark .status-badge.absent {
+            background: #991b1b;
+            color: #fee2e2;
+        }
+        body.dark .status-badge.halfday {
+            background: #854d0e;
+            color: #fef9c3;
+        }
+        body.dark .status-badge.leave {
+            background: #1e40af;
+            color: #dbeafe;
+        }
+        body.dark .status-badge.pending {
+            background: #92400e;
+            color: #fef3c7;
+        }
+        body.dark .status-badge.approved {
+            background: #166534;
+            color: #dcfce7;
+        }
+        body.dark .status-badge.rejected {
+            background: #991b1b;
+            color: #fee2e2;
+        }
 
-    document.getElementById('editEmployeeForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      if (!editingUserId) return;
-      const phone = document.getElementById('editPhoneAdmin').value.trim();
-      const address = document.getElementById('editAddressAdmin').value.trim();
-      try {
-        await apiFetch(`employees.php?id=${editingUserId}`, {
-          method: 'PUT',
-          body: { phone, address }
+        /* ── Buttons ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.45rem 1rem;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-decoration: none;
+            font-family: 'Poppins', sans-serif;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
+        }
+        .btn-success {
+            background: #16a34a;
+            color: #fff;
+        }
+        .btn-success:hover {
+            background: #15803d;
+        }
+        .btn-danger {
+            background: #dc2626;
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+        .btn-outline {
+            background: transparent;
+            color: #475569;
+            border: 1px solid #d1d5db;
+        }
+        .btn-outline:hover {
+            background: #f1f5f9;
+        }
+        body.dark .btn-outline {
+            color: #e2e8f0;
+            border-color: #475569;
+        }
+        body.dark .btn-outline:hover {
+            background: #334155;
+        }
+        .btn-sm {
+            padding: 0.25rem 0.6rem;
+            font-size: 0.7rem;
+        }
+
+        /* ── Toast ── */
+        #toastContainer {
+            position: fixed;
+            top: 1.25rem;
+            right: 1.25rem;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-width: 380px;
+            width: 100%;
+        }
+        .toast-item {
+            padding: 0.75rem 1.25rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #fff;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            animation: slideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            backdrop-filter: blur(4px);
+        }
+        .toast-item.success {
+            background: rgba(22, 163, 74, 0.9);
+        }
+        .toast-item.error {
+            background: rgba(220, 38, 38, 0.9);
+        }
+        .toast-item.info {
+            background: rgba(37, 99, 235, 0.9);
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* ── Modal ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(6px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .modal-overlay.open {
+            display: flex;
+        }
+        .modal-box {
+            background: #fff;
+            border-radius: 20px;
+            max-width: 540px;
+            width: 100%;
+            padding: 1.75rem 2rem 2rem;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+            animation: modalPop 0.25s ease;
+        }
+        body.dark .modal-box {
+            background: #1e293b;
+        }
+        @keyframes modalPop {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        .modal-box .modal-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #0f172a;
+        }
+        body.dark .modal-box .modal-title {
+            color: #f1f5f9;
+        }
+        .modal-box .form-group {
+            margin-bottom: 1rem;
+        }
+        .modal-box .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #475569;
+            margin-bottom: 0.2rem;
+        }
+        body.dark .modal-box .form-group label {
+            color: #94a3b8;
+        }
+        .modal-box .form-group input,
+        .modal-box .form-group select,
+        .modal-box .form-group textarea {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            transition: border 0.15s, box-shadow 0.15s;
+            outline: none;
+            font-family: 'Poppins', sans-serif;
+            background: #fff;
+            color: #0f172a;
+        }
+        body.dark .modal-box .form-group input,
+        body.dark .modal-box .form-group select,
+        body.dark .modal-box .form-group textarea {
+            background: #0f172a;
+            border-color: #475569;
+            color: #e2e8f0;
+        }
+        .modal-box .form-group input:focus,
+        .modal-box .form-group select:focus,
+        .modal-box .form-group textarea:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+        .modal-box .form-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.25rem;
+            justify-content: flex-end;
+        }
+
+        /* ── Search / Filter ── */
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 0.3rem 0.75rem;
+            border: 1px solid transparent;
+            transition: all 0.15s;
+        }
+        body.dark .search-box {
+            background: #334155;
+        }
+        .search-box:focus-within {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+        .search-box input {
+            border: none;
+            background: transparent;
+            padding: 0.4rem 0.5rem;
+            font-size: 0.8rem;
+            width: 180px;
+            outline: none;
+            color: #0f172a;
+            font-family: 'Poppins', sans-serif;
+        }
+        body.dark .search-box input {
+            color: #e2e8f0;
+        }
+        .search-box input::placeholder {
+            color: #94a3b8;
+        }
+        .search-box i {
+            color: #94a3b8;
+        }
+
+        /* ── Dark mode toggle ── */
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: #64748b;
+            transition: color 0.15s;
+        }
+        .theme-toggle:hover {
+            color: #0f172a;
+        }
+        body.dark .theme-toggle {
+            color: #94a3b8;
+        }
+        body.dark .theme-toggle:hover {
+            color: #e2e8f0;
+        }
+
+        /* ── Pagination ── */
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            justify-content: flex-end;
+            margin-top: 0.75rem;
+            padding: 0 0.75rem 0.75rem 0;
+        }
+        .pagination button {
+            padding: 0.2rem 0.7rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            color: #0f172a;
+            font-family: 'Poppins', sans-serif;
+        }
+        body.dark .pagination button {
+            background: #1e293b;
+            border-color: #475569;
+            color: #e2e8f0;
+        }
+        .pagination button.active {
+            background: #2563eb;
+            color: #fff;
+            border-color: #2563eb;
+        }
+        .pagination button:hover:not(.active) {
+            background: #f1f5f9;
+        }
+        body.dark .pagination button:hover:not(.active) {
+            background: #334155;
+        }
+
+        /* ── Mini chart (attendance trend) ── */
+        .mini-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 40px;
+        }
+        .mini-chart .bar {
+            flex: 1;
+            border-radius: 4px 4px 0 0;
+            background: linear-gradient(to top, #2563eb, #7c3aed);
+            min-height: 4px;
+            transition: height 0.3s;
+        }
+        body.dark .mini-chart .bar {
+            background: linear-gradient(to top, #60a5fa, #a78bfa);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .sidebar-overlay.open {
+                display: block;
+            }
+            .main-wrap {
+                margin-left: 0;
+            }
+            .hamburger {
+                display: block;
+            }
+            .content {
+                padding: 1.25rem;
+            }
+            .topbar {
+                padding: 0.5rem 1.25rem;
+            }
+            .search-box input {
+                width: 120px;
+            }
+        }
+        @media (max-width: 640px) {
+            .stat-card .stat-number {
+                font-size: 1.3rem;
+            }
+            .topbar .page-title {
+                font-size: 0.9rem;
+            }
+            .topbar .right-actions .profile-pill .name-label {
+                display: none;
+            }
+            .modal-box {
+                padding: 1.25rem;
+            }
+            .content {
+                padding: 0.75rem;
+            }
+            .card-panel .card-body {
+                padding: 0.75rem;
+            }
+            .search-box input {
+                width: 100px;
+            }
+        }
+        .profile-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem 1.5rem;
+        }
+        .profile-detail-grid .item .label {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .profile-detail-grid .item .value {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #0f172a;
+        }
+        body.dark .profile-detail-grid .item .value {
+            color: #e2e8f0;
+        }
+        .quick-action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.75rem;
+        }
+        .quick-action-grid .qa-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1rem 0.75rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #eef2f6;
+        }
+        body.dark .quick-action-grid .qa-card {
+            background: #1e293b;
+            border-color: #334155;
+        }
+        .quick-action-grid .qa-card:hover {
+            background: #eef2ff;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        body.dark .quick-action-grid .qa-card:hover {
+            background: #334155;
+        }
+        .quick-action-grid .qa-card .qa-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+        .quick-action-grid .qa-card .qa-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #1e293b;
+        }
+        body.dark .quick-action-grid .qa-card .qa-label {
+            color: #e2e8f0;
+        }
+        .avatar-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #fff;
+            flex-shrink: 0;
+            font-size: 0.85rem;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+        }
+        .text-truncate {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 140px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== SIDEBAR OVERLAY (mobile) ===== -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar(false)"></div>
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon"><i class="fas fa-briefcase"></i></div>
+            <div>
+                <h1>HRMS</h1>
+                <small>Human Resource Management</small>
+            </div>
+        </div>
+        <nav class="sidebar-nav" id="sidebarNav">
+            <div class="nav-label">Main</div>
+            <a class="active" data-section="dashboard" onclick="navigateTo('dashboard')">
+                <i class="fas fa-th-large"></i> Dashboard
+            </a>
+            <div class="nav-label mt-3">Management</div>
+            <a data-section="employees" onclick="navigateTo('employees')">
+                <i class="fas fa-users"></i> Employees
+                <span class="badge-nav" id="empCountBadge">0</span>
+            </a>
+            <a data-section="attendance" onclick="navigateTo('attendance')">
+                <i class="fas fa-clipboard-check"></i> Attendance
+            </a>
+            <a data-section="leaves" onclick="navigateTo('leaves')">
+                <i class="fas fa-calendar-check"></i> Leave Management
+                <span class="badge-nav" id="leaveBadge">0</span>
+            </a>
+            <a data-section="payroll" onclick="navigateTo('payroll')">
+                <i class="fas fa-wallet"></i> Payroll
+            </a>
+            <div class="nav-label mt-3">Personal</div>
+            <a data-section="profile" onclick="navigateTo('profile')">
+                <i class="fas fa-user-circle"></i> My Profile
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="avatar-sm" id="sidebarAvatar">JD</div>
+            <div class="user-meta">
+                <div class="name" id="sidebarName">John Doe</div>
+                <div class="role" id="sidebarRole">Admin</div>
+            </div>
+            <i class="fas fa-sign-out-alt logout-btn" onclick="handleLogout()" title="Logout"></i>
+        </div>
+    </aside>
+
+    <!-- ===== MAIN WRAP ===== -->
+    <div class="main-wrap">
+
+        <!-- ===== TOP BAR ===== -->
+        <header class="topbar">
+            <div class="flex items-center gap-3">
+                <button class="hamburger" onclick="toggleSidebar(true)">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="page-title" id="pageTitle">Dashboard <span>overview</span></div>
+            </div>
+            <div class="right-actions">
+                <button class="theme-toggle" onclick="toggleDarkMode()" title="Toggle dark mode">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+                <span class="icon-btn" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="dot"></span>
+                </span>
+                <div class="profile-pill" onclick="navigateTo('profile')">
+                    <div class="av" id="topAvatar">JD</div>
+                    <span class="name-label" id="topName">John Doe</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- ===== CONTENT ===== -->
+        <main class="content">
+
+            <!-- ──── DASHBOARD ──── -->
+            <section id="section-dashboard" class="section active">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="stat-card flex items-center gap-4">
+                        <div class="stat-icon bg-blue-50 text-blue-600"><i class="fas fa-users"></i></div>
+                        <div><div class="stat-number" id="dashTotalEmps">0</div><div class="stat-label">Total Employees</div></div>
+                    </div>
+                    <div class="stat-card flex items-center gap-4">
+                        <div class="stat-icon bg-green-50 text-green-600"><i class="fas fa-user-check"></i></div>
+                        <div><div class="stat-number" id="dashPresent">0</div><div class="stat-label">Present Today</div></div>
+                    </div>
+                    <div class="stat-card flex items-center gap-4">
+                        <div class="stat-icon bg-amber-50 text-amber-600"><i class="fas fa-clock"></i></div>
+                        <div><div class="stat-number" id="dashPendingLeaves">0</div><div class="stat-label">Pending Leaves</div></div>
+                    </div>
+                    <div class="stat-card flex items-center gap-4">
+                        <div class="stat-icon bg-purple-50 text-purple-600"><i class="fas fa-calendar-day"></i></div>
+                        <div><div class="stat-number" id="dashOnLeave">0</div><div class="stat-label">On Leave Today</div></div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions + Mini Chart -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+                    <div class="lg:col-span-2">
+                        <h4 class="text-sm font-semibold text-gray-600 mb-2">Quick Actions</h4>
+                        <div class="quick-action-grid">
+                            <div class="qa-card" onclick="navigateTo('employees')">
+                                <div class="qa-icon">👥</div>
+                                <div class="qa-label">Manage Employees</div>
+                            </div>
+                            <div class="qa-card" onclick="navigateTo('attendance')">
+                                <div class="qa-icon">📊</div>
+                                <div class="qa-label">View Attendance</div>
+                            </div>
+                            <div class="qa-card" onclick="navigateTo('leaves')">
+                                <div class="qa-icon">✅</div>
+                                <div class="qa-label">Leave Approvals</div>
+                            </div>
+                            <div class="qa-card" onclick="navigateTo('payroll')">
+                                <div class="qa-icon">💰</div>
+                                <div class="qa-label">Payroll</div>
+                            </div>
+                            <div class="qa-card" onclick="navigateTo('profile')">
+                                <div class="qa-icon">👤</div>
+                                <div class="qa-label">My Profile</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card flex flex-col justify-center">
+                        <div class="text-sm font-medium text-gray-500 mb-1">Attendance Trend (Last 7 days)</div>
+                        <div class="mini-chart" id="attendanceChart"></div>
+                        <div class="flex justify-between text-xs text-gray-400 mt-1">
+                            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="card-panel">
+                    <div class="card-header">
+                        <h3><i class="fas fa-history text-gray-400 mr-2"></i>Recent Activity</h3>
+                        <span class="text-xs text-gray-400">Last 7 days</span>
+                    </div>
+                    <div class="card-body" id="recentActivity">
+                        <p class="text-sm text-gray-500">Loading activity...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ──── EMPLOYEES ──── -->
+            <section id="section-employees" class="section">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">All Employees</h2>
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="employeeSearch" placeholder="Search by name..." oninput="filterEmployees()" />
+                        </div>
+                        <button class="btn btn-primary" onclick="openAddEmployeeModal()">
+                            <i class="fas fa-plus"></i> Add Employee
+                        </button>
+                    </div>
+                </div>
+                <div class="card-panel">
+                    <div class="card-body p-0">
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Department</th>
+                                        <th>Phone</th>
+                                        <th class="text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="employeeTableBody">
+                                    <tr><td colspan="7" class="text-center text-gray-400 py-4">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination" id="employeePagination"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ──── ATTENDANCE ──── -->
+            <section id="section-attendance" class="section">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">Attendance Records</h2>
+                    <div class="flex gap-2">
+                        <button class="btn btn-outline btn-sm" onclick="refreshAttendance()"><i class="fas fa-sync"></i> Refresh</button>
+                    </div>
+                </div>
+                <div class="card-panel">
+                    <div class="card-header">
+                        <h3><i class="fas fa-calendar-alt text-gray-400 mr-2"></i>This Month</h3>
+                        <span class="text-xs text-gray-400" id="attendanceMonthLabel">Loading...</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr><th>Employee</th><th>Date</th><th>Status</th></tr>
+                                </thead>
+                                <tbody id="attendanceTableBody">
+                                    <tr><td colspan="3" class="text-center text-gray-400 py-4">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination" id="attendancePagination"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ──── LEAVE MANAGEMENT ──── -->
+            <section id="section-leaves" class="section">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">Leave Management</h2>
+                    <button class="btn btn-primary" onclick="openApplyLeaveModal()">
+                        <i class="fas fa-plus"></i> Apply Leave
+                    </button>
+                </div>
+                <div class="card-panel">
+                    <div class="card-header">
+                        <h3><i class="fas fa-list text-gray-400 mr-2"></i>All Leave Requests</h3>
+                        <span class="text-xs text-gray-400" id="leaveCountLabel">0 requests</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr><th>Employee</th><th>Type</th><th>Start</th><th>End</th><th>Status</th><th>Comments</th><th class="text-right">Actions</th></tr>
+                                </thead>
+                                <tbody id="leaveTableBody">
+                                    <tr><td colspan="7" class="text-center text-gray-400 py-4">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination" id="leavePagination"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ──── PAYROLL ──── -->
+            <section id="section-payroll" class="section">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">Payroll Management</h2>
+                    <button class="btn btn-primary" onclick="openPayrollModal()">
+                        <i class="fas fa-edit"></i> Update Salary
+                    </button>
+                </div>
+                <div class="card-panel">
+                    <div class="card-header">
+                        <h3><i class="fas fa-wallet text-gray-400 mr-2"></i>Salary Overview</h3>
+                        <span class="text-xs text-gray-400">All employees</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr><th>Employee</th><th>Role</th><th>Basic Salary</th><th>Allowance</th><th>Deductions</th><th>Net Pay</th></tr>
+                                </thead>
+                                <tbody id="payrollTableBody">
+                                    <tr><td colspan="6" class="text-center text-gray-400 py-4">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination" id="payrollPagination"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ──── MY PROFILE ──── -->
+            <section id="section-profile" class="section">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">My Profile</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                    <div class="card-panel lg:col-span-1">
+                        <div class="card-body text-center">
+                            <div class="avatar-circle w-24 h-24 mx-auto text-3xl" id="profileAvatar">JD</div>
+                            <h3 class="mt-3 text-lg font-bold" id="profileName">John Doe</h3>
+                            <p class="text-sm text-gray-500 capitalize" id="profileRole">Admin</p>
+                            <p class="text-xs text-gray-400" id="profileEmail">john@example.com</p>
+                            <hr class="my-4" />
+                            <button class="btn btn-primary w-full" onclick="openEditProfileModal()">
+                                <i class="fas fa-pen"></i> Edit Profile
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-panel lg:col-span-2">
+                        <div class="card-header"><h3>Personal Details</h3></div>
+                        <div class="card-body">
+                            <div class="profile-detail-grid">
+                                <div class="item"><span class="label">Employee ID</span><span class="value" id="pEmpId">EMP-001</span></div>
+                                <div class="item"><span class="label">Department</span><span class="value" id="pDept">Engineering</span></div>
+                                <div class="item"><span class="label">Phone</span><span class="value" id="pPhone">+1 234 567 890</span></div>
+                                <div class="item"><span class="label">Address</span><span class="value" id="pAddress">123 Main St, NY</span></div>
+                                <div class="item"><span class="label">Salary</span><span class="value" id="pSalary">$5,000</span></div>
+                                <div class="item"><span class="label">Join Date</span><span class="value" id="pJoin">2024-01-15</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ===== TOAST CONTAINER ===== -->
+    <div id="toastContainer"></div>
+
+    <!-- ===== MODALS ===== -->
+    <!-- Edit Employee -->
+    <div class="modal-overlay" id="editEmployeeModal">
+        <div class="modal-box">
+            <div class="modal-title"><i class="fas fa-user-edit text-blue-600 mr-2"></i>Edit Employee</div>
+            <form id="editEmployeeForm">
+                <input type="hidden" id="editEmpId" />
+                <div class="form-group"><label>Phone</label><input type="text" id="editEmpPhone" placeholder="Phone number" /></div>
+                <div class="form-group"><label>Address</label><input type="text" id="editEmpAddress" placeholder="Address" /></div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('editEmployeeModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Add Employee -->
+    <div class="modal-overlay" id="addEmployeeModal">
+        <div class="modal-box">
+            <div class="modal-title"><i class="fas fa-user-plus text-blue-600 mr-2"></i>Add New Employee</div>
+            <form id="addEmployeeForm">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="form-group"><label>Full Name *</label><input type="text" id="addEmpName" required /></div>
+                    <div class="form-group"><label>Email *</label><input type="email" id="addEmpEmail" required /></div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="form-group"><label>Employee ID *</label><input type="text" id="addEmpId" required /></div>
+                    <div class="form-group"><label>Role *</label><select id="addEmpRole"><option value="employee">Employee</option><option value="hr">HR</option><option value="admin">Admin</option></select></div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="form-group"><label>Department</label><input type="text" id="addEmpDept" placeholder="e.g. Engineering" /></div>
+                    <div class="form-group"><label>Phone</label><input type="text" id="addEmpPhone" placeholder="Phone" /></div>
+                </div>
+                <div class="form-group"><label>Address</label><input type="text" id="addEmpAddress" placeholder="Address" /></div>
+                <div class="form-group"><label>Password *</label><input type="password" id="addEmpPassword" required placeholder="Min 6 chars" /></div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('addEmployeeModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Employee</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Apply Leave -->
+    <div class="modal-overlay" id="applyLeaveModal">
+        <div class="modal-box">
+            <div class="modal-title"><i class="fas fa-calendar-plus text-blue-600 mr-2"></i>Apply for Leave</div>
+            <form id="applyLeaveForm">
+                <div class="form-group"><label>Leave Type *</label><select id="leaveType"><option value="Paid">Paid Leave</option><option value="Sick">Sick Leave</option><option value="Unpaid">Unpaid Leave</option></select></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="form-group"><label>Start Date *</label><input type="date" id="leaveStart" required /></div>
+                    <div class="form-group"><label>End Date *</label><input type="date" id="leaveEnd" required /></div>
+                </div>
+                <div class="form-group"><label>Remarks</label><textarea id="leaveRemarks" rows="2" placeholder="Optional remarks..."></textarea></div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('applyLeaveModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Edit Profile -->
+    <div class="modal-overlay" id="editProfileModal">
+        <div class="modal-box">
+            <div class="modal-title"><i class="fas fa-user-edit text-blue-600 mr-2"></i>Edit My Profile</div>
+            <form id="editProfileForm">
+                <div class="form-group"><label>Phone</label><input type="text" id="editProfPhone" /></div>
+                <div class="form-group"><label>Address</label><input type="text" id="editProfAddress" /></div>
+                <div class="form-group"><label>Profile Picture URL</label><input type="text" id="editProfAvatar" placeholder="https://example.com/avatar.jpg" /></div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('editProfileModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Payroll Update -->
+    <div class="modal-overlay" id="payrollModal">
+        <div class="modal-box">
+            <div class="modal-title"><i class="fas fa-coins text-blue-600 mr-2"></i>Update Salary</div>
+            <form id="payrollForm">
+                <div class="form-group"><label>Employee *</label><select id="payrollEmpSelect"></select></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="form-group"><label>Basic Salary</label><input type="number" id="payrollBasic" placeholder="0" /></div>
+                    <div class="form-group"><label>Allowance</label><input type="number" id="payrollAllowance" placeholder="0" /></div>
+                </div>
+                <div class="form-group"><label>Deductions</label><input type="number" id="payrollDeductions" placeholder="0" /></div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('payrollModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Salary</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT -->
+    <!-- ============================================================ -->
+    <script>
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // STATE
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        const state = {
+            currentUser: null,
+            employees: [],
+            attendance: [],
+            leaves: [],
+            payroll: [],
+            darkMode: false,
+            empPage: 1,
+            attPage: 1,
+            leavePage: 1,
+            payrollPage: 1,
+            pageSize: 8,
+        };
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // TOAST
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const el = document.createElement('div');
+            el.className = `toast-item ${type}`;
+            const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
+            el.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i> ${message}`;
+            container.appendChild(el);
+            setTimeout(() => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateX(20px)';
+                setTimeout(() => el.remove(), 300);
+            }, 3500);
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // MODALS
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        function openModal(id) { document.getElementById(id).classList.add('open'); }
+
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+        function openEditEmployeeModal(id) {
+            const emp = state.employees.find(e => e.id === id);
+            if (!emp) return showToast('Employee not found', 'error');
+            document.getElementById('editEmpId').value = id;
+            document.getElementById('editEmpPhone').value = emp.phone || '';
+            document.getElementById('editEmpAddress').value = emp.address || '';
+            openModal('editEmployeeModal');
+        }
+
+        function openAddEmployeeModal() { openModal('addEmployeeModal'); }
+
+        function openApplyLeaveModal() { openModal('applyLeaveModal'); }
+
+        function openEditProfileModal() {
+            const u = state.currentUser;
+            if (!u) return;
+            document.getElementById('editProfPhone').value = u.phone || '';
+            document.getElementById('editProfAddress').value = u.address || '';
+            document.getElementById('editProfAvatar').value = u.avatar || '';
+            openModal('editProfileModal');
+        }
+
+        function openPayrollModal() {
+            populatePayrollSelect();
+            openModal('payrollModal');
+        }
+
+        function populatePayrollSelect() {
+            const sel = document.getElementById('payrollEmpSelect');
+            sel.innerHTML = state.employees.map(e =>
+                `<option value="${e.id}">${e.name} (${e.employee_id})</option>`
+            ).join('');
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // DARK MODE
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        function toggleDarkMode() {
+            state.darkMode = !state.darkMode;
+            document.body.classList.toggle('dark', state.darkMode);
+            document.getElementById('themeIcon').className = state.darkMode ? 'fas fa-sun' : 'fas fa-moon';
+            localStorage.setItem('hrms-dark', state.darkMode);
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // NAVIGATION
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        const sectionTitles = {
+            dashboard: 'Dashboard <span>overview</span>',
+            employees: 'Employees <span>management</span>',
+            attendance: 'Attendance <span>tracking</span>',
+            leaves: 'Leave Management <span>requests & approvals</span>',
+            payroll: 'Payroll <span>salary overview</span>',
+            profile: 'My Profile <span>personal details</span>',
+        };
+
+        function navigateTo(section) {
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+            const target = document.getElementById(`section-${section}`);
+            if (target) target.classList.add('active');
+            document.querySelectorAll('.sidebar-nav a').forEach(el => el.classList.remove('active'));
+            const navLink = document.querySelector(`.sidebar-nav a[data-section="${section}"]`);
+            if (navLink) navLink.classList.add('active');
+            document.getElementById('pageTitle').innerHTML = sectionTitles[section] || section;
+            toggleSidebar(false);
+            if (section === 'employees') renderEmployees();
+            if (section === 'attendance') renderAttendance();
+            if (section === 'leaves') renderLeaves();
+            if (section === 'payroll') renderPayroll();
+            if (section === 'profile') renderProfile();
+            if (section === 'dashboard') renderDashboard();
+        }
+
+        function toggleSidebar(open) {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (open) {
+                sidebar.classList.add('open');
+                overlay.classList.add('open');
+            } else {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('open');
+            }
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // MOCK DATA GENERATION
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        function generateId() { return Date.now() + Math.floor(Math.random() * 10000); }
+
+        function randomItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+        function randomDate(start, end) {
+            const d = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+            return d.toISOString().slice(0, 10);
+        }
+
+        function initMockData() {
+            const employees = [];
+            const firstNames = ['Alice', 'Bob', 'Carol', 'David', 'Eva', 'Frank', 'Grace', 'Henry', 'Ivy', 'Jack', 'Karen',
+                'Leo', 'Mia', 'Noah', 'Olivia'
+            ];
+            const lastNames = ['Johnson', 'Smith', 'White', 'Brown', 'Green', 'Black', 'Lee', 'Wilson', 'Martinez', 'Davis',
+                'Garcia', 'Rodriguez', 'Williams', 'Jones', 'Miller'
+            ];
+            const depts = ['Engineering', 'Marketing', 'Sales', 'HR', 'Finance', 'Operations', 'IT', 'Legal'];
+            for (let i = 0; i < 25; i++) {
+                const name = `${randomItem(firstNames)} ${randomItem(lastNames)}`;
+                const role = i < 2 ? 'admin' : (i < 5 ? 'hr' : 'employee');
+                employees.push({
+                    id: 100 + i,
+                    employee_id: `EMP-${String(1000 + i).padStart(4, '0')}`,
+                    name,
+                    email: name.toLowerCase().replace(' ', '.') + '@company.com',
+                    role,
+                    department: randomItem(depts),
+                    phone: `+1 ${Math.floor(100 + Math.random()*900)}-${Math.floor(100 + Math.random()*900)}-${Math.floor(1000 + Math.random()*9000)}`,
+                    address: `${Math.floor(100 + Math.random()*900)} Main St, ${randomItem(['NY', 'LA', 'SF', 'CHI', 'MIA', 'SEA'])}`,
+                    avatar: '',
+                    salary: 3000 + Math.floor(Math.random() * 7000),
+                    join_date: randomDate(new Date(2023, 0, 1), new Date(2024, 11, 31)),
+                });
+            }
+            state.employees = employees;
+
+            // Attendance (last 30 days)
+            const att = [];
+            const today = new Date();
+            for (let i = 0; i < 30; i++) {
+                const d = new Date(today);
+                d.setDate(d.getDate() - i);
+                const dateStr = d.toISOString().slice(0, 10);
+                employees.forEach(emp => {
+                    let status = 'Present';
+                    const r = Math.random();
+                    if (r < 0.10) status = 'Absent';
+                    else if (r < 0.16) status = 'Half-day';
+                    else if (r < 0.22) status = 'Leave';
+                    att.push({ employee_id: emp.id, employee_name: emp.name, date: dateStr, status });
+                });
+            }
+            state.attendance = att;
+
+            // Leaves
+            const leaves = [];
+            employees.forEach(emp => {
+                for (let i = 0; i < 4; i++) {
+                    const start = randomDate(new Date(2025, 0, 1), new Date(2025, 5, 30));
+                    const end = randomDate(new Date(start), new Date(new Date(start).getTime() + 5 * 86400000));
+                    const status = i === 0 ? 'Pending' : randomItem(['Pending', 'Approved', 'Rejected']);
+                    leaves.push({
+                        id: generateId(),
+                        employee_id: emp.id,
+                        employee_name: emp.name,
+                        leave_type: randomItem(['Paid', 'Sick', 'Unpaid']),
+                        start_date: start,
+                        end_date: end,
+                        status,
+                        remarks: ['Family event', 'Medical appointment', 'Vacation', 'Personal', 'Travel'][i % 5],
+                    });
+                }
+            });
+            state.leaves = leaves;
+
+            // Payroll
+            state.payroll = employees.map(emp => ({
+                employee_id: emp.id,
+                employee_name: emp.name,
+                role: emp.role,
+                basic: 3000 + Math.floor(Math.random() * 5000),
+                allowance: 200 + Math.floor(Math.random() * 800),
+                deductions: 100 + Math.floor(Math.random() * 400),
+            }));
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // RENDER FUNCTIONS
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function renderDashboard() {
+            const total = state.employees.length;
+            const today = new Date().toISOString().slice(0, 10);
+            const todayAtt = state.attendance.filter(a => a.date === today);
+            const present = todayAtt.filter(a => a.status === 'Present').length;
+            const onLeave = todayAtt.filter(a => a.status === 'Leave').length;
+            const pendingLeaves = state.leaves.filter(l => l.status === 'Pending').length;
+
+            document.getElementById('dashTotalEmps').textContent = total;
+            document.getElementById('dashPresent').textContent = present;
+            document.getElementById('dashOnLeave').textContent = onLeave;
+            document.getElementById('dashPendingLeaves').textContent = pendingLeaves;
+            document.getElementById('empCountBadge').textContent = total;
+            document.getElementById('leaveBadge').textContent = pendingLeaves;
+
+            const recent = state.leaves.slice(0, 6);
+            const container = document.getElementById('recentActivity');
+            if (recent.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-500">No recent activity.</p>';
+            } else {
+                container.innerHTML = recent.map(l =>
+                    `<div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                        <div><span class="font-medium">${l.employee_name}</span> <span class="text-gray-500">requested</span> <span class="font-medium">${l.leave_type}</span> leave</div>
+                        <span class="status-badge ${l.status.toLowerCase()}">${l.status}</span>
+                    </div>`
+                ).join('');
+            }
+
+            const chart = document.getElementById('attendanceChart');
+            const days = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const ds = d.toISOString().slice(0, 10);
+                const presentCount = state.attendance.filter(a => a.date === ds && a.status === 'Present').length;
+                days.push(presentCount);
+            }
+            const max = Math.max(...days, 1);
+            chart.innerHTML = days.map(count => {
+                const height = (count / max) * 100;
+                return `<div class="bar" style="height:${Math.max(height, 4)}%;"></div>`;
+            }).join('');
+        }
+
+        function renderEmployees() {
+            const search = document.getElementById('employeeSearch').value.toLowerCase();
+            let filtered = state.employees.filter(e => e.name.toLowerCase().includes(search));
+            const totalPages = Math.ceil(filtered.length / state.pageSize) || 1;
+            if (state.empPage > totalPages) state.empPage = totalPages;
+            const start = (state.empPage - 1) * state.pageSize;
+            const pageItems = filtered.slice(start, start + state.pageSize);
+
+            const tbody = document.getElementById('employeeTableBody');
+            if (pageItems.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-400 py-4">No employees</td></tr>';
+            } else {
+                tbody.innerHTML = pageItems.map(e =>
+                    `<tr>
+                        <td class="font-mono text-xs">${e.employee_id}</td>
+                        <td class="font-medium">${e.name}</td>
+                        <td>${e.email}</td>
+                        <td><span class="capitalize text-xs bg-gray-100 px-2 py-0.5 rounded">${e.role}</span></td>
+                        <td>${e.department || '—'}</td>
+                        <td>${e.phone || '—'}</td>
+                        <td class="text-right">
+                            <button class="btn btn-primary btn-sm" onclick="openEditEmployeeModal(${e.id})"><i class="fas fa-edit"></i></button>
+                        </td>
+                    </tr>`
+                ).join('');
+            }
+
+            const pag = document.getElementById('employeePagination');
+            pag.innerHTML = '';
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                if (i === state.empPage) btn.classList.add('active');
+                btn.onclick = () => { state.empPage = i;
+                    renderEmployees(); };
+                pag.appendChild(btn);
+            }
+        }
+
+        function filterEmployees() {
+            state.empPage = 1;
+            renderEmployees();
+        }
+
+        function renderAttendance() {
+            const today = new Date();
+            const month = today.toLocaleString('default', { month: 'long', year: 'numeric' });
+            document.getElementById('attendanceMonthLabel').textContent = month;
+
+            const records = state.attendance.slice(0, 50);
+            const totalPages = Math.ceil(records.length / state.pageSize) || 1;
+            if (state.attPage > totalPages) state.attPage = totalPages;
+            const start = (state.attPage - 1) * state.pageSize;
+            const pageItems = records.slice(start, start + state.pageSize);
+
+            const tbody = document.getElementById('attendanceTableBody');
+            if (pageItems.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="text-center text-gray-400 py-4">No records</td></tr>';
+            } else {
+                tbody.innerHTML = pageItems.map(a =>
+                    `<tr>
+                        <td class="font-medium">${a.employee_name}</td>
+                        <td>${a.date}</td>
+                        <td><span class="status-badge ${a.status.toLowerCase().replace('half-day','halfday')}">${a.status}</span></td>
+                    </tr>`
+                ).join('');
+            }
+
+            const pag = document.getElementById('attendancePagination');
+            pag.innerHTML = '';
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                if (i === state.attPage) btn.classList.add('active');
+                btn.onclick = () => { state.attPage = i;
+                    renderAttendance(); };
+                pag.appendChild(btn);
+            }
+        }
+
+        function renderLeaves() {
+            const leaves = state.leaves.slice(0, 30);
+            document.getElementById('leaveCountLabel').textContent = `${state.leaves.length} requests`;
+            const totalPages = Math.ceil(leaves.length / state.pageSize) || 1;
+            if (state.leavePage > totalPages) state.leavePage = totalPages;
+            const start = (state.leavePage - 1) * state.pageSize;
+            const pageItems = leaves.slice(start, start + state.pageSize);
+
+            const tbody = document.getElementById('leaveTableBody');
+            const isAdmin = state.currentUser?.role === 'admin' || state.currentUser?.role === 'hr';
+            if (pageItems.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-400 py-4">No leave requests</td></tr>';
+            } else {
+                tbody.innerHTML = pageItems.map(l => {
+                    const canAct = isAdmin && l.status === 'Pending';
+                    return `<tr>
+                        <td class="font-medium">${l.employee_name}</td>
+                        <td>${l.leave_type}</td>
+                        <td>${l.start_date}</td>
+                        <td>${l.end_date}</td>
+                        <td><span class="status-badge ${l.status.toLowerCase()}">${l.status}</span></td>
+                        <td class="text-gray-500 text-sm">${l.remarks || '—'}</td>
+                        <td class="text-right">
+                            ${canAct ? `
+                                <button class="btn btn-success btn-sm" onclick="approveLeave(${l.id})"><i class="fas fa-check"></i></button>
+                                <button class="btn btn-danger btn-sm" onclick="rejectLeave(${l.id})"><i class="fas fa-times"></i></button>
+                            ` : `<span class="text-xs text-gray-400">${l.status}</span>`}
+                        </td>
+                    </tr>`;
+                }).join('');
+            }
+
+            const pag = document.getElementById('leavePagination');
+            pag.innerHTML = '';
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                if (i === state.leavePage) btn.classList.add('active');
+                btn.onclick = () => { state.leavePage = i;
+                    renderLeaves(); };
+                pag.appendChild(btn);
+            }
+        }
+
+        function renderPayroll() {
+            const data = state.payroll;
+            const totalPages = Math.ceil(data.length / state.pageSize) || 1;
+            if (state.payrollPage > totalPages) state.payrollPage = totalPages;
+            const start = (state.payrollPage - 1) * state.pageSize;
+            const pageItems = data.slice(start, start + state.pageSize);
+
+            const tbody = document.getElementById('payrollTableBody');
+            if (pageItems.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-400 py-4">No payroll data</td></tr>';
+            } else {
+                tbody.innerHTML = pageItems.map(p => {
+                    const net = (p.basic || 0) + (p.allowance || 0) - (p.deductions || 0);
+                    return `<tr>
+                        <td class="font-medium">${p.employee_name}</td>
+                        <td><span class="capitalize text-xs">${p.role}</span></td>
+                        <td>$${(p.basic || 0).toLocaleString()}</td>
+                        <td>$${(p.allowance || 0).toLocaleString()}</td>
+                        <td>$${(p.deductions || 0).toLocaleString()}</td>
+                        <td class="font-bold text-green-700">$${net.toLocaleString()}</td>
+                    </tr>`;
+                }).join('');
+            }
+
+            const pag = document.getElementById('payrollPagination');
+            pag.innerHTML = '';
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                if (i === state.payrollPage) btn.classList.add('active');
+                btn.onclick = () => { state.payrollPage = i;
+                    renderPayroll(); };
+                pag.appendChild(btn);
+            }
+        }
+
+        function renderProfile() {
+            const u = state.currentUser;
+            if (!u) return;
+            const initials = u.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+            document.getElementById('profileAvatar').textContent = initials;
+            document.getElementById('profileName').textContent = u.name;
+            document.getElementById('profileRole').textContent = u.role;
+            document.getElementById('profileEmail').textContent = u.email;
+            document.getElementById('pEmpId').textContent = u.employee_id || '—';
+            document.getElementById('pDept').textContent = u.department || '—';
+            document.getElementById('pPhone').textContent = u.phone || '—';
+            document.getElementById('pAddress').textContent = u.address || '—';
+            document.getElementById('pSalary').textContent = u.salary ? `$${u.salary.toLocaleString()}` : '—';
+            document.getElementById('pJoin').textContent = u.join_date || '—';
+            document.getElementById('sidebarAvatar').textContent = initials;
+            document.getElementById('sidebarName').textContent = u.name;
+            document.getElementById('sidebarRole').textContent = u.role;
+            document.getElementById('topAvatar').textContent = initials;
+            document.getElementById('topName').textContent = u.name;
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ACTIONS
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function approveLeave(id) {
+            const leave = state.leaves.find(l => l.id === id);
+            if (!leave) return showToast('Leave not found', 'error');
+            leave.status = 'Approved';
+            renderLeaves();
+            renderDashboard();
+            showToast('Leave approved', 'success');
+        }
+
+        function rejectLeave(id) {
+            const leave = state.leaves.find(l => l.id === id);
+            if (!leave) return showToast('Leave not found', 'error');
+            leave.status = 'Rejected';
+            renderLeaves();
+            renderDashboard();
+            showToast('Leave rejected', 'info');
+        }
+
+        function refreshAttendance() {
+            renderAttendance();
+            showToast('Attendance refreshed', 'info');
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // FORM HANDLERS
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        document.getElementById('editEmployeeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = parseInt(document.getElementById('editEmpId').value);
+            const emp = state.employees.find(e => e.id === id);
+            if (!emp) return showToast('Employee not found', 'error');
+            emp.phone = document.getElementById('editEmpPhone').value.trim();
+            emp.address = document.getElementById('editEmpAddress').value.trim();
+            closeModal('editEmployeeModal');
+            renderEmployees();
+            renderProfile();
+            showToast('Employee updated', 'success');
         });
-        renderAdminEmployees();
-        closeEditModal();
-        showToast('Employee updated');
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    });
 
-    // ============================================================
-    //  ADMIN: Attendance
-    // ============================================================
-    async function renderAdminAttendance() {
-      try {
-        const now = new Date();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const year = now.getFullYear();
-        const resp = await apiFetch(
-          `attendance.php?action=admin&date_from=${year}-${month}-01&date_to=${year}-${month}-${new Date(year, month, 0).getDate()}`
-        );
-        const records = resp.data || [];
-        const tbody = document.getElementById('adminAttendanceTable');
-        if (records.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="3" class="py-2 text-gray-500">No records</td></tr>';
-          return;
-        }
-        tbody.innerHTML = records.slice(0, 30).map(r => `
-          <tr class="border-b">
-            <td class="p-3">${r.employee_name}</td>
-            <td>${r.date}</td>
-            <td class="font-medium ${r.status === 'Present' ? 'text-green-600' : r.status === 'Absent' ? 'text-red-600' : r.status === 'Half-day' ? 'text-yellow-600' : r.status === 'Leave' ? 'text-blue-600' : 'text-gray-400'}">${r.status}</td>
-          </tr>
-        `).join('');
-      } catch (err) {
-        showToast('Failed to load attendance: ' + err.message, 'error');
-      }
-    }
-
-    // ============================================================
-    //  ADMIN: Leave Approvals
-    // ============================================================
-    async function renderAdminLeaves() {
-      try {
-        const resp = await apiFetch('leave.php?action=pending');
-        const leaves = resp.data || [];
-        const tbody = document.getElementById('adminLeaveTable');
-        if (leaves.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="7" class="py-2 text-gray-500">No pending requests</td></tr>';
-          return;
-        }
-        tbody.innerHTML = leaves.map(l => {
-          const isPending = l.status === 'Pending';
-          return `
-            <tr class="border-b">
-              <td class="p-3">${l.employee_name}</td>
-              <td>${l.leave_type}</td>
-              <td>${l.start_date}</td>
-              <td>${l.end_date}</td>
-              <td class="font-medium ${l.status === 'Approved' ? 'text-green-600' : l.status === 'Rejected' ? 'text-red-600' : 'text-yellow-600'}">${l.status}</td>
-              <td>${l.remarks || '-'}</td>
-              <td>
-                ${isPending ? `
-                  <button onclick="handleLeave(${l.id}, 'approve')" class="bg-green-600 text-white text-xs px-3 py-1 rounded hover:bg-green-700 mr-1">Approve</button>
-                  <button onclick="handleLeave(${l.id}, 'reject')" class="bg-red-600 text-white text-xs px-3 py-1 rounded hover:bg-red-700">Reject</button>
-                ` : `<span class="text-gray-400 text-sm">${l.status}</span>`}
-              </td>
-            </tr>
-          `;
-        }).join('');
-      } catch (err) {
-        showToast('Failed to load leaves: ' + err.message, 'error');
-      }
-    }
-
-    async function handleLeave(leaveId, action) {
-      const remarks = prompt(`Enter comment for ${action}ing:`);
-      if (remarks === null) return;
-      try {
-        await apiFetch(`leave.php?action=${action}&id=${leaveId}`, {
-          method: 'PUT',
-          body: { remarks }
+        document.getElementById('addEmployeeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('addEmpName').value.trim();
+            const email = document.getElementById('addEmpEmail').value.trim();
+            const empId = document.getElementById('addEmpId').value.trim();
+            const role = document.getElementById('addEmpRole').value;
+            const dept = document.getElementById('addEmpDept').value.trim();
+            const phone = document.getElementById('addEmpPhone').value.trim();
+            const address = document.getElementById('addEmpAddress').value.trim();
+            const password = document.getElementById('addEmpPassword').value;
+            if (!name || !email || !empId || !password || password.length < 6) {
+                return showToast('Please fill all required fields (password min 6 chars)', 'error');
+            }
+            const newEmp = {
+                id: generateId(),
+                employee_id: empId,
+                name,
+                email,
+                role,
+                department: dept || '—',
+                phone: phone || '—',
+                address: address || '—',
+                avatar: '',
+                salary: 3000,
+                join_date: new Date().toISOString().slice(0, 10),
+            };
+            state.employees.push(newEmp);
+            state.payroll.push({
+                employee_id: newEmp.id,
+                employee_name: name,
+                role,
+                basic: 3000,
+                allowance: 300,
+                deductions: 150,
+            });
+            closeModal('addEmployeeModal');
+            document.getElementById('addEmployeeForm').reset();
+            renderEmployees();
+            renderDashboard();
+            renderPayroll();
+            showToast(`Employee ${name} added`, 'success');
         });
-        renderAdminLeaves();
-        showToast(`Leave ${action}d`);
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    }
 
-    // ============================================================
-    //  INIT
-    // ============================================================
-    (async function init() {
-      const ok = await loadSession();
-      if (!ok) {
-        window.location.href = '../login.html?loop_break=1';
-        return;
-      }
-      renderApp();
-    })();
-  </script>
+        document.getElementById('applyLeaveForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const type = document.getElementById('leaveType').value;
+            const start = document.getElementById('leaveStart').value;
+            const end = document.getElementById('leaveEnd').value;
+            const remarks = document.getElementById('leaveRemarks').value.trim();
+            if (!start || !end) return showToast('Please select dates', 'error');
+            const u = state.currentUser;
+            const newLeave = {
+                id: generateId(),
+                employee_id: u.id,
+                employee_name: u.name,
+                leave_type: type,
+                start_date: start,
+                end_date: end,
+                status: 'Pending',
+                remarks: remarks || '—',
+            };
+            state.leaves.unshift(newLeave);
+            closeModal('applyLeaveModal');
+            document.getElementById('applyLeaveForm').reset();
+            renderLeaves();
+            renderDashboard();
+            showToast('Leave request submitted', 'success');
+        });
+
+        document.getElementById('editProfileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const u = state.currentUser;
+            if (!u) return;
+            u.phone = document.getElementById('editProfPhone').value.trim();
+            u.address = document.getElementById('editProfAddress').value.trim();
+            u.avatar = document.getElementById('editProfAvatar').value.trim();
+            closeModal('editProfileModal');
+            renderProfile();
+            showToast('Profile updated', 'success');
+        });
+
+        document.getElementById('payrollForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const empId = parseInt(document.getElementById('payrollEmpSelect').value);
+            const basic = parseFloat(document.getElementById('payrollBasic').value) || 0;
+            const allowance = parseFloat(document.getElementById('payrollAllowance').value) || 0;
+            const deductions = parseFloat(document.getElementById('payrollDeductions').value) || 0;
+            const p = state.payroll.find(p => p.employee_id === empId);
+            if (!p) return showToast('Payroll record not found', 'error');
+            p.basic = basic;
+            p.allowance = allowance;
+            p.deductions = deductions;
+            closeModal('payrollModal');
+            renderPayroll();
+            showToast('Salary updated', 'success');
+        });
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // LOGOUT
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        function handleLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                showToast('Logged out', 'info');
+            }
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // INIT
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        function init() {
+            const saved = localStorage.getItem('hrms-dark') === 'true';
+            if (saved) {
+                state.darkMode = true;
+                document.body.classList.add('dark');
+                document.getElementById('themeIcon').className = 'fas fa-sun';
+            }
+
+            state.currentUser = {
+                id: 100,
+                employee_id: 'EMP-1000',
+                name: 'John Doe',
+                email: 'john.doe@company.com',
+                role: 'admin',
+                department: 'Engineering',
+                phone: '+1 234 567 890',
+                address: '123 Main St, NY',
+                avatar: '',
+                salary: 5000,
+                join_date: '2024-01-15',
+            };
+
+            initMockData();
+            renderDashboard();
+            renderEmployees();
+            renderAttendance();
+            renderLeaves();
+            renderPayroll();
+            renderProfile();
+            navigateTo('dashboard');
+
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 1024) {
+                    document.getElementById('sidebar').classList.remove('open');
+                    document.getElementById('sidebarOverlay').classList.remove('open');
+                }
+            });
+            console.log('✅ Professional HRMS ready (Poppins + Font Awesome)');
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
 </body>
 </html>
