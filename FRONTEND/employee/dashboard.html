@@ -366,7 +366,7 @@
     // ============================================================
     //  API CONFIGURATION
     // ============================================================
-    const API_BASE = 'http://localhost/backend/api/'; // CHANGE to your backend URL
+    const API_BASE = '../../backend/api/';
 
     async function apiFetch(endpoint, options = {}) {
       const url = endpoint.startsWith('http') ? endpoint : API_BASE + endpoint;
@@ -395,9 +395,12 @@
     async function checkSession() {
       try {
         const data = await apiFetch('auth.php?action=check');
-        if (data.user) {
-          currentUser = data.user;
-          return true;
+        if (data.success && data.data && data.data.user_id) {
+          const userData = await apiFetch('employees.php?id=' + data.data.user_id);
+          if (userData.success && userData.data) {
+            currentUser = userData.data;
+            return true;
+          }
         }
       } catch (e) {}
       return false;
@@ -576,9 +579,9 @@
           method: 'POST',
           body: { email, password }
         });
-        setCurrentUser(data.user);
+        setCurrentUser(data.data);
         renderApp();
-        showToast('Welcome, ' + data.user.name);
+        showToast('Welcome, ' + data.data.name);
       } catch (err) {
         errorEl.textContent = err.message || 'Login failed';
         errorEl.classList.remove('hidden');
@@ -594,11 +597,15 @@
       const role = document.getElementById('signupRole').value;
       const errorEl = document.getElementById('signupError');
       try {
-        const data = await apiFetch('auth.php?action=register', {
+        await apiFetch('auth.php?action=register', {
           method: 'POST',
           body: { employee_id, name, email, password, role }
         });
-        setCurrentUser(data.user);
+        const loginData = await apiFetch('auth.php?action=login', {
+          method: 'POST',
+          body: { email, password }
+        });
+        setCurrentUser(loginData.data);
         renderApp();
         showToast('Account created! Welcome ' + name);
       } catch (err) {
