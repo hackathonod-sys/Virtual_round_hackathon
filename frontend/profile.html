@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile</title>
+    <!-- Bootstrap 5.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts - Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ── Same as admin dashboard ── */
+        :root {
+            --font-primary: 'Poppins', sans-serif;
+            --color-bg: #f1f5f9;
+            --color-surface: #ffffff;
+            --color-primary: #4f46e5;
+            --color-primary-dark: #4338ca;
+            --color-text: #1e293b;
+            --color-text-secondary: #64748b;
+            --color-text-muted: #94a3b8;
+            --color-border: #e2e8f0;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.05);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.07);
+            --shadow-xl: 0 20px 40px rgba(0,0,0,0.10);
+            --radius-sm: 10px;
+            --radius-md: 14px;
+            --radius-lg: 18px;
+            --transition-fast: 0.2s cubic-bezier(0.4,0,0.2,1);
+            --transition-smooth: 0.35s cubic-bezier(0.4,0,0.2,1);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-bg);
+            color: var(--color-text);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+        .navbar-custom {
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: 0 1.5rem;
+            height: 68px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow var(--transition-smooth);
+        }
+        .navbar-custom.scrolled { box-shadow: var(--shadow-md); }
+        .navbar-brand-custom {
+            font-weight: 700;
+            font-size: 1.55rem;
+            letter-spacing: -0.02em;
+            color: var(--color-primary) !important;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            white-space: nowrap;
+        }
+        .navbar-brand-custom .brand-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border-radius: var(--radius-sm);
+            color: #fff;
+            font-size: 1.1rem;
+        }
+        .navbar-toggler-custom {
+            border: none;
+            background: transparent;
+            color: var(--color-text);
+            font-size: 1.35rem;
+            padding: 0.5rem;
+            cursor: pointer;
+            border-radius: 8px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .navbar-toggler-custom:hover { color: var(--color-primary); background: #f8fafc; }
+        .navbar-toggler-custom:focus { outline: none; box-shadow: 0 0 0 3px rgba(79,70,229,0.15); }
+        .nav-link-custom {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--color-text-secondary) !important;
+            padding: 0.55rem 1rem !important;
+            border-radius: 8px;
+            transition: all var(--transition-fast);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            white-space: nowrap;
+        }
+        .nav-link-custom i { font-size: 0.85rem; width: 18px; text-align: center; }
+        .nav-link-custom:hover { color: var(--color-primary) !important; background: #f8fafc; }
+        .nav-link-custom.active-link { color: var(--color-primary) !important; background: #eef2ff; font-weight: 600; }
+        .nav-links-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+            flex-wrap: wrap;
+        }
+        .btn-logout {
+            font-weight: 500;
+            font-size: 0.88rem;
+            padding: 0.5rem 1.2rem;
+            border-radius: 8px;
+            border: 1.5px solid #e2e8f0;
+            background: var(--color-surface);
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            white-space: nowrap;
+        }
+        .btn-logout:hover { border-color: #ef4444; color: #ef4444; background: #fef2f2; box-shadow: 0 0 0 4px rgba(239,68,68,0.06); }
+        .btn-logout i { transition: transform var(--transition-fast); }
+        .btn-logout:hover i { transform: translateX(2px); }
+
+        @media (max-width: 991.98px) {
+            .navbar-collapse-custom {
+                position: absolute;
+                top: 68px;
+                left: 0;
+                right: 0;
+                background: var(--color-surface);
+                border-bottom: 1px solid var(--color-border);
+                padding: 1rem 1.5rem;
+                box-shadow: var(--shadow-lg);
+                border-radius: 0 0 var(--radius-md) var(--radius-md);
+                z-index: 1029;
+                display: none;
+                flex-direction: column;
+                gap: 0.3rem;
+                animation: slideDown 0.3s cubic-bezier(0.4,0,0.2,1);
+            }
+            .navbar-collapse-custom.show { display: flex; }
+            .nav-links-wrapper { flex-direction: column; gap: 0.2rem; width: 100%; }
+            .nav-link-custom { padding: 0.7rem 1rem !important; width: 100%; font-size: 0.95rem; }
+            .btn-logout { width: 100%; justify-content: center; margin-top: 0.5rem; }
+            .navbar-custom { padding: 0 1rem; }
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .main-container {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 1.8rem 1.5rem 3rem;
+        }
+        .profile-card {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            padding: 1.8rem;
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition-smooth);
+            animation: fadeInUp 0.55s cubic-bezier(0.4,0,0.2,1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .profile-card:hover { box-shadow: var(--shadow-md); }
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #eef2ff, #c7d2fe);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: var(--color-primary);
+            margin: 0 auto 1rem;
+        }
+        .profile-field {
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #f8fafc;
+            display: flex;
+            justify-content: space-between;
+        }
+        .profile-field .label { color: var(--color-text-secondary); font-weight: 500; }
+        .profile-field .value { font-weight: 600; color: var(--color-text); }
+        .btn-primary-custom {
+            background: var(--color-primary);
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            color: #fff;
+            transition: background var(--transition-fast);
+        }
+        .btn-primary-custom:hover { background: var(--color-primary-dark); }
+
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <!-- ═══ NAVBAR ═══ -->
+    <nav class="navbar-custom" id="mainNavbar">
+        <a class="navbar-brand-custom" href="#">
+            <span class="brand-icon"><i class="fa-solid fa-building-columns"></i></span>
+            HRMS
+        </a>
+        <button class="navbar-toggler-custom d-lg-none ms-auto me-2" type="button" id="navbarToggler">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="navbar-collapse-custom d-lg-flex align-items-center ms-auto" id="navbarContent">
+            <div class="nav-links-wrapper me-lg-3" id="navLinksContainer"></div>
+            <button class="btn-logout mt-2 mt-lg-0" id="logoutBtn">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </button>
+        </div>
+    </nav>
+
+    <!-- ═══ MAIN ═══ -->
+    <div class="main-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fa-solid fa-id-card" style="color:var(--color-primary);"></i> My Profile</h2>
+        </div>
+
+        <div class="row g-4">
+            <!-- View Profile -->
+            <div class="col-lg-6">
+                <div class="profile-card" id="viewProfile">
+                    <div class="profile-avatar"><i class="fa-solid fa-user"></i></div>
+                    <div id="profileDisplay">
+                        <div class="text-center mb-3"><span class="spinner-border spinner-border-sm" role="status"></span></div>
+                    </div>
+                    <button class="btn-primary-custom w-100 mt-3" id="editToggleBtn"><i class="fa-solid fa-pen"></i> Edit Profile</button>
+                </div>
+            </div>
+            <!-- Edit Form -->
+            <div class="col-lg-6" id="editProfileSection" style="display:none;">
+                <div class="profile-card">
+                    <h5 class="mb-3"><i class="fa-solid fa-pen-to-square"></i> Edit Profile</h5>
+                    <form id="editProfileForm">
+                        <div class="mb-3">
+                            <label>Phone</label>
+                            <input type="text" class="form-control" id="editPhone" placeholder="Enter phone">
+                        </div>
+                        <div class="mb-3">
+                            <label>Address</label>
+                            <input type="text" class="form-control" id="editAddress" placeholder="Enter address">
+                        </div>
+                        <div class="mb-3">
+                            <label>Profile Picture URL</label>
+                            <input type="text" class="form-control" id="editProfilePic" placeholder="Image URL (optional)">
+                        </div>
+                        <button type="submit" class="btn-primary-custom w-100"><i class="fa-solid fa-save"></i> Update</button>
+                    </form>
+                    <div id="editMessage" class="mt-3"></div>
+                    <button class="btn btn-secondary mt-2 w-100" id="cancelEditBtn"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        // ── Build Nav ──
+        document.addEventListener('DOMContentLoaded', () => {
+            const role = localStorage.getItem('role');
+            if (!role) { window.location.href = 'login.html'; return; }
+            const navLinksContainer = document.getElementById('navLinksContainer');
+            const links = [
+                { href: 'dashboard.html', label: 'Dashboard', icon: 'fa-solid fa-gauge-high' },
+                { href: 'profile.html', label: 'My Profile', icon: 'fa-solid fa-id-card' },
+                { href: 'attendance.html', label: 'Attendance', icon: 'fa-solid fa-clipboard-user' },
+                { href: 'leaves.html', label: 'My Leaves', icon: 'fa-solid fa-calendar-days' },
+                { href: 'salary.html', label: 'Salary', icon: 'fa-solid fa-indian-rupee-sign' },
+                { href: 'announcements.html', label: 'Announcements', icon: 'fa-solid fa-bullhorn' }
+            ];
+            links.forEach(link => {
+                const a = document.createElement('a');
+                a.className = 'nav-link-custom';
+                a.href = link.href;
+                a.innerHTML = `<i class="${link.icon}"></i> ${link.label}`;
+                if (link.href === 'profile.html') a.classList.add('active-link');
+                navLinksContainer.appendChild(a);
+            });
+
+            // Mobile toggler
+            const navbarToggler = document.getElementById('navbarToggler');
+            const navbarContent = document.getElementById('navbarContent');
+            const togglerIcon = navbarToggler.querySelector('i');
+            navbarToggler.addEventListener('click', () => {
+                const isShown = navbarContent.classList.toggle('show');
+                togglerIcon.className = isShown ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+            });
+            navLinksContainer.addEventListener('click', (e) => {
+                if (e.target.closest('a') && navbarContent.classList.contains('show')) {
+                    navbarContent.classList.remove('show');
+                    togglerIcon.className = 'fa-solid fa-bars';
+                }
+            });
+            window.addEventListener('scroll', () => {
+                document.getElementById('mainNavbar').classList.toggle('scrolled', window.scrollY > 10);
+            });
+
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', async () => {
+                try { await apiCall('logout', 'POST'); } catch (e) {}
+                localStorage.removeItem('role');
+                window.location.href = 'login.html';
+            });
+
+            // ── Profile Logic ──
+            loadProfile();
+            document.getElementById('editToggleBtn').addEventListener('click', () => {
+                document.getElementById('editProfileSection').style.display = 'block';
+                document.getElementById('viewProfile').style.opacity = '0.6';
+                // Populate form with current values
+                apiCall('profile').then(data => {
+                    document.getElementById('editPhone').value = data.phone || '';
+                    document.getElementById('editAddress').value = data.address || '';
+                    document.getElementById('editProfilePic').value = data.profile_pic || '';
+                });
+            });
+            document.getElementById('cancelEditBtn').addEventListener('click', () => {
+                document.getElementById('editProfileSection').style.display = 'none';
+                document.getElementById('viewProfile').style.opacity = '1';
+            });
+            document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const payload = {
+                    phone: document.getElementById('editPhone').value,
+                    address: document.getElementById('editAddress').value,
+                    profile_pic: document.getElementById('editProfilePic').value
+                };
+                try {
+                    await apiCall('profile', 'PUT', payload);
+                    document.getElementById('editMessage').innerHTML = '<div class="alert alert-success">Profile updated</div>';
+                    loadProfile();
+                    document.getElementById('editProfileSection').style.display = 'none';
+                    document.getElementById('viewProfile').style.opacity = '1';
+                } catch (err) {
+                    document.getElementById('editMessage').innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+                }
+            });
+        });
+
+        async function loadProfile() {
+            try {
+                const data = await apiCall('profile');
+                const display = document.getElementById('profileDisplay');
+                display.innerHTML = `
+                    <div class="profile-field"><span class="label">Name</span><span class="value">${data.first_name || ''} ${data.last_name || ''}</span></div>
+                    <div class="profile-field"><span class="label">Email</span><span class="value">${data.email || ''}</span></div>
+                    <div class="profile-field"><span class="label">Employee ID</span><span class="value">${data.employee_id || ''}</span></div>
+                    <div class="profile-field"><span class="label">Phone</span><span class="value">${data.phone || '—'}</span></div>
+                    <div class="profile-field"><span class="label">Address</span><span class="value">${data.address || '—'}</span></div>
+                    <div class="profile-field"><span class="label">Job Title</span><span class="value">${data.job_title || '—'}</span></div>
+                    <div class="profile-field"><span class="label">Department</span><span class="value">${data.department || '—'}</span></div>
+                    <div class="profile-field"><span class="label">Hire Date</span><span class="value">${data.hire_date || '—'}</span></div>
+                `;
+            } catch (err) {
+                document.getElementById('profileDisplay').innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRMS - Login & Register</title>
+    <!-- Bootstrap 5.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts - Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --font-primary: 'Poppins', sans-serif;
+            --color-primary: #4f46e5;
+            --color-primary-dark: #4338ca;
+            --color-bg: #f1f5f9;
+            --color-surface: #ffffff;
+            --color-text: #1e293b;
+            --color-text-secondary: #64748b;
+            --color-border: #e2e8f0;
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.07);
+            --radius-lg: 18px;
+            --transition-smooth: 0.35s cubic-bezier(0.4,0,0.2,1);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-bg);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #eef2ff 0%, #c7d2fe 100%);
+        }
+        .auth-card {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            padding: 2rem 2.5rem;
+            width: 100%;
+            max-width: 460px;
+            transition: all var(--transition-smooth);
+            border: 1px solid var(--color-border);
+        }
+        .auth-card:hover { box-shadow: 0 20px 40px rgba(0,0,0,0.10); }
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .auth-header .brand-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border-radius: 16px;
+            color: #fff;
+            font-size: 1.8rem;
+            margin-bottom: 0.8rem;
+        }
+        .auth-header h2 {
+            font-weight: 700;
+            font-size: 1.6rem;
+            color: var(--color-text);
+            letter-spacing: -0.02em;
+        }
+        .auth-header p {
+            color: var(--color-text-secondary);
+            font-size: 0.9rem;
+        }
+        .nav-tabs-custom .nav-link {
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            border: none;
+            padding: 0.6rem 1rem;
+            border-radius: 8px 8px 0 0;
+            transition: all var(--transition-smooth);
+        }
+        .nav-tabs-custom .nav-link.active {
+            color: var(--color-primary);
+            background: #eef2ff;
+            border-bottom: 3px solid var(--color-primary);
+        }
+        .nav-tabs-custom .nav-link:hover { background: #f8fafc; }
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1.5px solid var(--color-border);
+            padding: 0.6rem 1rem;
+            font-family: var(--font-primary);
+            transition: border var(--transition-smooth), box-shadow var(--transition-smooth);
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 4px rgba(79,70,229,0.10);
+        }
+        .btn-primary-custom {
+            background: var(--color-primary);
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #fff;
+            width: 100%;
+            transition: background var(--transition-smooth), transform var(--transition-smooth);
+        }
+        .btn-primary-custom:hover {
+            background: var(--color-primary-dark);
+            transform: translateY(-2px);
+        }
+        .btn-primary-custom:disabled { opacity: 0.6; cursor: not-allowed; }
+        .password-strength {
+            height: 4px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            margin-top: 0.3rem;
+            transition: width 0.3s;
+        }
+        .password-strength .bar {
+            height: 4px;
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .text-muted { font-size: 0.85rem; }
+        .otp-modal .modal-content {
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+        }
+        .otp-input {
+            font-size: 1.5rem;
+            letter-spacing: 0.5rem;
+            text-align: center;
+            max-width: 200px;
+            margin: 0 auto;
+        }
+        @media (max-width: 576px) {
+            .auth-card { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="brand-icon"><i class="fa-solid fa-building-columns"></i></div>
+            <h2>Welcome to HRMS</h2>
+            <p>Sign in to your account or create a new one</p>
+        </div>
+
+        <!-- Tabs -->
+        <ul class="nav nav-tabs-custom nav-justified mb-4" id="authTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button" role="tab">Login</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" role="tab">Register</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="authTabsContent">
+            <!-- ═══ LOGIN PANEL ═══ -->
+            <div class="tab-pane fade show active" id="login" role="tabpanel">
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" id="loginEmail" placeholder="your@email.com" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control" id="loginPassword" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn-primary-custom"><i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In</button>
+                    <div id="loginMessage" class="mt-3 text-center"></div>
+                </form>
+            </div>
+
+            <!-- ═══ REGISTER PANEL ═══ -->
+            <div class="tab-pane fade" id="register" role="tabpanel">
+                <form id="registerForm">
+                    <div class="mb-3">
+                        <label class="form-label">Employee ID</label>
+                        <input type="text" class="form-control" id="regEmpId" placeholder="EMP123" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" id="regEmail" placeholder="your@email.com" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control" id="regPassword" placeholder="Min 6 chars" required>
+                        <div class="password-strength mt-1"><div class="bar" id="strengthBar" style="width:0%;"></div></div>
+                        <small class="text-muted" id="strengthText">Weak</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Role</label>
+                        <select class="form-select" id="regRole">
+                            <option value="employee">Employee</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary-custom"><i class="fa-solid fa-user-plus"></i> Register</button>
+                    <div id="registerMessage" class="mt-3 text-center"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ OTP VERIFICATION MODAL ═══ -->
+    <div class="modal fade otp-modal" id="otpModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title"><i class="fa-solid fa-envelope" style="color:var(--color-primary);"></i> Verify Email</h5>
+                </div>
+                <div class="modal-body">
+                    <p>We've sent a 6-digit OTP to <strong id="otpEmailDisplay"></strong>. Please enter it below.</p>
+                    <input type="text" class="form-control otp-input" id="otpInput" maxlength="6" pattern="[0-9]*" inputmode="numeric" placeholder="XXXXXX">
+                    <div id="otpMessage" class="mt-2 text-center"></div>
+                    <div class="d-flex justify-content-between mt-3">
+                        <button class="btn btn-link" id="resendOtpBtn">Resend OTP</button>
+                        <button class="btn btn-primary" id="verifyOtpBtn">Verify</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        (function() {
+            // ── Password strength meter ──
+            const regPassword = document.getElementById('regPassword');
+            const strengthBar = document.getElementById('strengthBar');
+            const strengthText = document.getElementById('strengthText');
+
+            regPassword.addEventListener('input', function() {
+                const val = this.value;
+                let score = 0;
+                if (val.length >= 6) score++;
+                if (/[a-z]/.test(val) && /[A-Z]/.test(val)) score++;
+                if (/\d/.test(val)) score++;
+                if (/[^a-zA-Z0-9]/.test(val)) score++;
+                const pct = Math.min(100, score * 25);
+                strengthBar.style.width = pct + '%';
+                if (pct <= 25) {
+                    strengthBar.style.background = '#ef4444';
+                    strengthText.textContent = 'Weak';
+                } else if (pct <= 50) {
+                    strengthBar.style.background = '#f59e0b';
+                    strengthText.textContent = 'Fair';
+                } else if (pct <= 75) {
+                    strengthBar.style.background = '#3b82f6';
+                    strengthText.textContent = 'Good';
+                } else {
+                    strengthBar.style.background = '#10b981';
+                    strengthText.textContent = 'Strong';
+                }
+            });
+
+            // ── Registration ──
+            document.getElementById('registerForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const empId = document.getElementById('regEmpId').value.trim();
+                const email = document.getElementById('regEmail').value.trim();
+                const password = document.getElementById('regPassword').value;
+                const role = document.getElementById('regRole').value;
+
+                // Validate password strength
+                if (password.length < 6) {
+                    showMessage('registerMessage', 'Password must be at least 6 characters.', 'danger');
+                    return;
+                }
+                if (!/[A-Z]/.test(password)) {
+                    showMessage('registerMessage', 'Password must contain at least one uppercase letter.', 'danger');
+                    return;
+                }
+                if (!/[a-z]/.test(password)) {
+                    showMessage('registerMessage', 'Password must contain at least one lowercase letter.', 'danger');
+                    return;
+                }
+                if (!/[0-9]/.test(password)) {
+                    showMessage('registerMessage', 'Password must contain at least one digit.', 'danger');
+                    return;
+                }
+
+                try {
+                    const data = await apiCall('register', 'POST', { employee_id: empId, email, password, role });
+                    if (data.success) {
+                        // Show OTP modal
+                        document.getElementById('otpEmailDisplay').textContent = email;
+                        const otpModal = new bootstrap.Modal(document.getElementById('otpModal'));
+                        otpModal.show();
+                        document.getElementById('otpInput').value = '';
+                        document.getElementById('otpMessage').innerHTML = '';
+                        // Store email for verification
+                        document.getElementById('otpInput').dataset.email = email;
+                        showMessage('registerMessage', data.message, 'success');
+                    } else {
+                        showMessage('registerMessage', data.error || 'Registration failed.', 'danger');
+                    }
+                } catch (err) {
+                    showMessage('registerMessage', err.message, 'danger');
+                }
+            });
+
+            // ── Verify OTP ──
+            document.getElementById('verifyOtpBtn').addEventListener('click', async () => {
+                const email = document.getElementById('otpInput').dataset.email;
+                const otp = document.getElementById('otpInput').value.trim();
+                if (!otp || otp.length !== 6) {
+                    document.getElementById('otpMessage').innerHTML = '<div class="alert alert-warning">Please enter a valid 6-digit OTP.</div>';
+                    return;
+                }
+                try {
+                    const data = await apiCall('verify-otp', 'POST', { email, otp });
+                    if (data.success) {
+                        document.getElementById('otpMessage').innerHTML = '<div class="alert alert-success">' + data.message + '</div>';
+                        // Close modal after 2s and switch to login
+                        setTimeout(() => {
+                            bootstrap.Modal.getInstance(document.getElementById('otpModal')).hide();
+                            // Switch to login tab
+                            document.getElementById('login-tab').click();
+                            document.getElementById('loginEmail').value = email;
+                        }, 1500);
+                    } else {
+                        document.getElementById('otpMessage').innerHTML = '<div class="alert alert-danger">' + data.error + '</div>';
+                    }
+                } catch (err) {
+                    document.getElementById('otpMessage').innerHTML = '<div class="alert alert-danger">' + err.message + '</div>';
+                }
+            });
+
+            // ── Resend OTP ──
+            document.getElementById('resendOtpBtn').addEventListener('click', async () => {
+                const email = document.getElementById('otpInput').dataset.email;
+                if (!email) return;
+                try {
+                    const data = await apiCall('resend-otp', 'POST', { email });
+                    if (data.success) {
+                        document.getElementById('otpMessage').innerHTML = '<div class="alert alert-success">' + data.message + '</div>';
+                    } else {
+                        document.getElementById('otpMessage').innerHTML = '<div class="alert alert-danger">' + data.error + '</div>';
+                    }
+                } catch (err) {
+                    document.getElementById('otpMessage').innerHTML = '<div class="alert alert-danger">' + err.message + '</div>';
+                }
+            });
+
+            // ── Login ──
+            document.getElementById('loginForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('loginEmail').value.trim();
+                const password = document.getElementById('loginPassword').value;
+                try {
+                    const data = await apiCall('login', 'POST', { email, password });
+                    if (data.success) {
+                        localStorage.setItem('role', data.role);
+                        window.location.href = 'dashboard.html';
+                    } else {
+                        showMessage('loginMessage', data.error || 'Login failed.', 'danger');
+                    }
+                } catch (err) {
+                    showMessage('loginMessage', err.message, 'danger');
+                }
+            });
+
+            // ── Helper to show messages ──
+            function showMessage(id, text, type = 'info') {
+                const el = document.getElementById(id);
+                const cls = type === 'danger' ? 'alert-danger' : type === 'success' ? 'alert-success' : 'alert-info';
+                el.innerHTML = `<div class="alert ${cls} alert-sm">${text}</div>`;
+            }
+
+            // When OTP modal is hidden, clear message
+            document.getElementById('otpModal').addEventListener('hidden.bs.modal', function() {
+                document.getElementById('otpMessage').innerHTML = '';
+            });
+        })();
+    </script>
+</body>
+</html>

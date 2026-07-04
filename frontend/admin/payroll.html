@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payroll Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        /* ── Root ── */
+        :root {
+            --font-primary: 'Poppins', sans-serif;
+            --color-bg: #f1f5f9;
+            --color-surface: #ffffff;
+            --color-primary: #4f46e5;
+            --color-primary-dark: #4338ca;
+            --color-primary-light: #eef2ff;
+            --color-text: #1e293b;
+            --color-text-secondary: #64748b;
+            --color-text-muted: #94a3b8;
+            --color-border: #e2e8f0;
+            --color-border-light: #f1f5f9;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.12);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --transition-fast: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-smooth: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ── Reset & Base ── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-bg);
+            color: var(--color-text);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Navbar ── */
+        .navbar-custom {
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: 0 1.5rem;
+            height: 68px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow var(--transition-smooth);
+        }
+        .navbar-custom.scrolled {
+            box-shadow: var(--shadow-md);
+        }
+        .navbar-brand-custom {
+            font-weight: 700;
+            font-size: 1.55rem;
+            letter-spacing: -0.02em;
+            color: var(--color-primary) !important;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            white-space: nowrap;
+        }
+        .navbar-brand-custom .brand-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border-radius: var(--radius-sm);
+            color: #fff;
+            font-size: 1.1rem;
+        }
+        .navbar-toggler-custom {
+            border: none;
+            background: transparent;
+            color: var(--color-text);
+            font-size: 1.35rem;
+            padding: 0.5rem;
+            cursor: pointer;
+            border-radius: 8px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .navbar-toggler-custom:hover {
+            color: var(--color-primary);
+            background: #f8fafc;
+        }
+        .navbar-toggler-custom:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        }
+        .nav-link-custom {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--color-text-secondary) !important;
+            padding: 0.55rem 1rem !important;
+            border-radius: 8px;
+            transition: all var(--transition-fast);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            white-space: nowrap;
+        }
+        .nav-link-custom i {
+            font-size: 0.85rem;
+            width: 18px;
+            text-align: center;
+        }
+        .nav-link-custom:hover {
+            color: var(--color-primary) !important;
+            background: #f8fafc;
+        }
+        .nav-link-custom.active-link {
+            color: var(--color-primary) !important;
+            background: var(--color-primary-light);
+            font-weight: 600;
+        }
+        .nav-links-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+            flex-wrap: wrap;
+        }
+        .btn-logout {
+            font-weight: 500;
+            font-size: 0.88rem;
+            padding: 0.5rem 1.2rem;
+            border-radius: 8px;
+            border: 1.5px solid #e2e8f0;
+            background: var(--color-surface);
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            white-space: nowrap;
+        }
+        .btn-logout:hover {
+            border-color: #ef4444;
+            color: #ef4444;
+            background: #fef2f2;
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.06);
+        }
+        .btn-logout i {
+            transition: transform var(--transition-fast);
+        }
+        .btn-logout:hover i {
+            transform: translateX(2px);
+        }
+
+        @media (max-width: 991.98px) {
+            .navbar-collapse-custom {
+                position: absolute;
+                top: 68px;
+                left: 0;
+                right: 0;
+                background: var(--color-surface);
+                border-bottom: 1px solid var(--color-border);
+                padding: 1rem 1.5rem;
+                box-shadow: var(--shadow-lg);
+                border-radius: 0 0 var(--radius-md) var(--radius-md);
+                z-index: 1029;
+                display: none;
+                flex-direction: column;
+                gap: 0.3rem;
+                animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .navbar-collapse-custom.show {
+                display: flex;
+            }
+            .nav-links-wrapper {
+                flex-direction: column;
+                gap: 0.2rem;
+                width: 100%;
+            }
+            .nav-link-custom {
+                padding: 0.7rem 1rem !important;
+                width: 100%;
+                font-size: 0.95rem;
+            }
+            .btn-logout {
+                width: 100%;
+                justify-content: center;
+                margin-top: 0.5rem;
+            }
+            .navbar-custom {
+                padding: 0 1rem;
+            }
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── Main Container ── */
+        .main-container {
+            max-width: 1360px;
+            margin: 0 auto;
+            padding: 1.8rem 1.5rem 3rem;
+        }
+
+        /* ── Page Header ── */
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .page-header h2 {
+            font-weight: 700;
+            font-size: 1.65rem;
+            letter-spacing: -0.02em;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: var(--color-text);
+        }
+        .page-header h2 i {
+            color: var(--color-primary);
+        }
+        .page-header .subtitle {
+            color: var(--color-text-secondary);
+            font-weight: 400;
+            font-size: 0.95rem;
+        }
+
+        /* ── Controls Card ── */
+        .controls-card {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem 1.5rem;
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.75rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 0.75rem 1rem;
+            transition: box-shadow var(--transition-smooth);
+        }
+        .controls-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+        .controls-card .form-label {
+            font-weight: 500;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: var(--color-text-secondary);
+            margin-bottom: 0.25rem;
+        }
+        .controls-card .form-control,
+        .controls-card .form-select {
+            border-radius: var(--radius-sm);
+            border: 1.5px solid var(--color-border);
+            font-size: 0.9rem;
+            padding: 0.45rem 0.85rem;
+            transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+            background: #fafbfc;
+        }
+        .controls-card .form-control:focus,
+        .controls-card .form-select:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+            background: #fff;
+        }
+        .controls-card .form-control {
+            min-width: 160px;
+        }
+        .controls-card .btn {
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 0.45rem 1.25rem;
+            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+        .controls-card .btn i {
+            font-size: 0.9rem;
+        }
+        .btn-primary-custom {
+            background: var(--color-primary);
+            border: none;
+            color: #fff;
+        }
+        .btn-primary-custom:hover {
+            background: var(--color-primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+        .btn-success-custom {
+            background: #059669;
+            border: none;
+            color: #fff;
+        }
+        .btn-success-custom:hover {
+            background: #047857;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        }
+        .btn-warning-custom {
+            background: #d97706;
+            border: none;
+            color: #fff;
+        }
+        .btn-warning-custom:hover {
+            background: #b45309;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
+        }
+
+        /* ── Table Card ── */
+        .table-card {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            transition: box-shadow var(--transition-smooth);
+        }
+        .table-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+        .table-card .table-responsive {
+            max-height: 520px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+        .table-card .table-responsive::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .table-card .table-responsive::-webkit-scrollbar-track {
+            background: var(--color-border-light);
+        }
+        .table-card .table-responsive::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .table-card .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* ── Table ── */
+        .table-payroll {
+            margin: 0;
+            font-size: 0.88rem;
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+        }
+        .table-payroll thead th {
+            background: #f8fafc;
+            color: var(--color-text-secondary);
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 0.85rem 1rem;
+            border-bottom: 2px solid var(--color-border);
+            border-top: none;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+        }
+        .table-payroll thead th i {
+            margin-right: 0.35rem;
+            opacity: 0.6;
+            font-size: 0.7rem;
+        }
+        .table-payroll tbody td {
+            padding: 0.75rem 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid var(--color-border-light);
+            background: var(--color-surface);
+            transition: background var(--transition-fast);
+        }
+        .table-payroll tbody tr:hover td {
+            background: #fafbfc;
+        }
+        .table-payroll tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* ── Employee Cell ── */
+        .employee-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+        }
+        .employee-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: var(--color-primary);
+            flex-shrink: 0;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        }
+        .employee-name {
+            font-weight: 500;
+            color: var(--color-text);
+            white-space: nowrap;
+        }
+        .employee-id {
+            font-size: 0.7rem;
+            color: var(--color-text-muted);
+            display: block;
+            margin-top: 0.05rem;
+        }
+
+        /* ── Amount Cells ── */
+        .amount-cell {
+            font-weight: 500;
+            font-variant-numeric: tabular-nums;
+            color: var(--color-text);
+        }
+        .amount-cell.positive {
+            color: #059669;
+        }
+        .amount-cell.negative {
+            color: #dc2626;
+        }
+        .amount-cell.net {
+            font-weight: 700;
+            color: var(--color-text);
+        }
+
+        /* ── Status Badge ── */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            text-transform: capitalize;
+            border: 1px solid transparent;
+        }
+        .status-badge i {
+            font-size: 0.6rem;
+        }
+        .status-badge.draft {
+            background: #fef3c7;
+            color: #92400e;
+            border-color: #fde68a;
+        }
+        .status-badge.generated {
+            background: #dbeafe;
+            color: #1e40af;
+            border-color: #bfdbfe;
+        }
+        .status-badge.paid {
+            background: #d1fae5;
+            color: #065f46;
+            border-color: #a7f3d0;
+        }
+        .status-badge .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        .status-badge.draft .dot {
+            background: #d97706;
+        }
+        .status-badge.generated .dot {
+            background: #2563eb;
+        }
+        .status-badge.paid .dot {
+            background: #059669;
+        }
+
+        /* ── Pay Date ── */
+        .pay-date-cell {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            white-space: nowrap;
+        }
+        .pay-date-cell .no-date {
+            color: var(--color-text-muted);
+            font-style: italic;
+        }
+
+        /* ── Action Buttons ── */
+        .action-group {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            flex-wrap: wrap;
+        }
+        .btn-action {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+            background: transparent;
+            color: var(--color-text-secondary);
+        }
+        .btn-action:hover {
+            transform: translateY(-1px);
+        }
+        .btn-action:active {
+            transform: translateY(0);
+        }
+        .btn-action.edit {
+            background: var(--color-primary-light);
+            color: var(--color-primary);
+        }
+        .btn-action.edit:hover {
+            background: var(--color-primary);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+        }
+
+        /* ── Empty State ── */
+        .empty-state {
+            padding: 3rem 1.5rem;
+            text-align: center;
+            color: var(--color-text-secondary);
+        }
+        .empty-state i {
+            font-size: 2.5rem;
+            color: var(--color-text-muted);
+            margin-bottom: 0.75rem;
+            display: block;
+            opacity: 0.4;
+        }
+        .empty-state h6 {
+            font-weight: 600;
+            color: var(--color-text);
+        }
+        .empty-state p {
+            font-size: 0.9rem;
+            max-width: 360px;
+            margin: 0.25rem auto 0;
+        }
+
+        /* ── Toast ── */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-width: 380px;
+            width: 100%;
+        }
+        .toast-custom {
+            background: var(--color-surface);
+            border-radius: var(--radius-sm);
+            padding: 0.85rem 1.2rem;
+            box-shadow: var(--shadow-lg);
+            border-left: 4px solid var(--color-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: toastIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--color-text);
+        }
+        .toast-custom.success {
+            border-left-color: #059669;
+        }
+        .toast-custom.warning {
+            border-left-color: #d97706;
+        }
+        .toast-custom.danger {
+            border-left-color: #dc2626;
+        }
+        .toast-custom .toast-icon {
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .toast-custom.success .toast-icon {
+            color: #059669;
+        }
+        .toast-custom.warning .toast-icon {
+            color: #d97706;
+        }
+        .toast-custom.danger .toast-icon {
+            color: #dc2626;
+        }
+        .toast-custom .toast-close {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: var(--color-text-muted);
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 0 0.25rem;
+            transition: color var(--transition-fast);
+        }
+        .toast-custom .toast-close:hover {
+            color: var(--color-text);
+        }
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(24px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* ── Modal tweaks ── */
+        .modal-content {
+            border-radius: var(--radius-lg);
+            border: none;
+            box-shadow: var(--shadow-xl);
+        }
+        .modal-header {
+            border-bottom: 1px solid var(--color-border-light);
+            padding: 1.25rem 1.5rem;
+        }
+        .modal-header .modal-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .modal-body {
+            padding: 1.5rem;
+        }
+        .modal-footer {
+            border-top: 1px solid var(--color-border-light);
+            padding: 1rem 1.5rem;
+        }
+        .modal-footer .btn {
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            padding: 0.45rem 1.25rem;
+        }
+        .modal-footer .btn-primary {
+            background: var(--color-primary);
+            border: none;
+        }
+        .modal-footer .btn-primary:hover {
+            background: var(--color-primary-dark);
+        }
+
+        /* ── Accuracy Report ── */
+        .accuracy-report {
+            margin-top: 1.5rem;
+        }
+        .accuracy-report .alert {
+            border-radius: var(--radius-sm);
+            border: none;
+            padding: 1rem 1.25rem;
+            font-weight: 500;
+        }
+        .accuracy-report .alert-success {
+            background: #ecfdf5;
+            color: #065f46;
+        }
+        .accuracy-report .alert-warning {
+            background: #fffbeb;
+            color: #92400e;
+        }
+        .accuracy-report .alert-info {
+            background: #eff6ff;
+            color: #1e40af;
+        }
+        .accuracy-report .alert-danger {
+            background: #fef2f2;
+            color: #991b1b;
+        }
+        .accuracy-report .table {
+            font-size: 0.85rem;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            border: 1px solid var(--color-border);
+        }
+        .accuracy-report .table thead th {
+            background: #f8fafc;
+            font-weight: 600;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border-bottom: 2px solid var(--color-border);
+        }
+        .accuracy-report .table tbody td {
+            vertical-align: middle;
+            padding: 0.6rem 0.75rem;
+        }
+        .accuracy-report .badge {
+            font-weight: 500;
+            padding: 0.3rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+        }
+
+        /* ── Animations ── */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .table-payroll tbody tr {
+            animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+        }
+        .table-payroll tbody tr:nth-child(1) {
+            animation-delay: 0.02s;
+        }
+        .table-payroll tbody tr:nth-child(2) {
+            animation-delay: 0.04s;
+        }
+        .table-payroll tbody tr:nth-child(3) {
+            animation-delay: 0.06s;
+        }
+        .table-payroll tbody tr:nth-child(4) {
+            animation-delay: 0.08s;
+        }
+        .table-payroll tbody tr:nth-child(5) {
+            animation-delay: 0.10s;
+        }
+        .table-payroll tbody tr:nth-child(6) {
+            animation-delay: 0.12s;
+        }
+        .table-payroll tbody tr:nth-child(7) {
+            animation-delay: 0.14s;
+        }
+        .table-payroll tbody tr:nth-child(8) {
+            animation-delay: 0.16s;
+        }
+        .table-payroll tbody tr:nth-child(9) {
+            animation-delay: 0.18s;
+        }
+        .table-payroll tbody tr:nth-child(10) {
+            animation-delay: 0.20s;
+        }
+
+        /* ── Responsive tweaks ── */
+        @media (max-width: 768px) {
+            .page-header h2 {
+                font-size: 1.3rem;
+            }
+            .table-payroll {
+                font-size: 0.8rem;
+            }
+            .table-payroll thead th,
+            .table-payroll tbody td {
+                padding: 0.55rem 0.65rem;
+            }
+            .employee-avatar {
+                width: 28px;
+                height: 28px;
+                font-size: 0.65rem;
+            }
+            .employee-name {
+                font-size: 0.8rem;
+            }
+            .action-group {
+                gap: 0.15rem;
+            }
+            .btn-action {
+                width: 28px;
+                height: 28px;
+                font-size: 0.7rem;
+            }
+        }
+        @media (max-width: 576px) {
+            .main-container {
+                padding: 1rem 0.75rem 2rem;
+            }
+            .controls-card {
+                padding: 1rem;
+            }
+            .table-card .table-responsive {
+                max-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══ NAVBAR ═══ -->
+    <nav class="navbar-custom" id="mainNavbar">
+        <a class="navbar-brand-custom" href="#">
+            <span class="brand-icon"><i class="fa-solid fa-building-columns"></i></span>
+            HRMS
+        </a>
+        <button class="navbar-toggler-custom d-lg-none ms-auto me-2" type="button" id="navbarToggler">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="navbar-collapse-custom d-lg-flex align-items-center ms-auto" id="navbarContent">
+            <div class="nav-links-wrapper me-lg-3" id="navLinksContainer"></div>
+            <button class="btn-logout mt-2 mt-lg-0" id="logoutBtn">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </button>
+        </div>
+    </nav>
+
+    <!-- ═══ MAIN ═══ -->
+    <div class="main-container">
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <h2>
+                <i class="fa-solid fa-indian-rupee-sign"></i> Payroll Management
+                <span class="subtitle">· Review & manage employee payroll</span>
+            </h2>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls-card">
+            <div>
+                <label for="payrollMonth" class="form-label"><i class="fa-regular fa-calendar"></i> Month</label>
+                <input type="month" id="payrollMonth" class="form-control" style="min-width:170px;" />
+            </div>
+            <div>
+                <button id="loadPayrollBtn" class="btn btn-primary-custom">
+                    <i class="fa-solid fa-sync"></i> Load
+                </button>
+            </div>
+            <div>
+                <button id="generatePayrollBtn" class="btn btn-success-custom">
+                    <i class="fa-solid fa-plus"></i> Generate
+                </button>
+            </div>
+            <div>
+                <button id="verifyAccuracyBtn" class="btn btn-warning-custom">
+                    <i class="fa-solid fa-check-double"></i> Verify Accuracy
+                </button>
+            </div>
+            <div class="ms-auto">
+                <span class="text-muted" style="font-size:0.8rem;font-weight:500;">
+                    <i class="fa-regular fa-circle-check" style="color:#059669;"></i>
+                    <span id="recordCount">0</span> records
+                </span>
+            </div>
+        </div>
+
+        <!-- Table Card -->
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="table table-payroll" id="payrollTable">
+                    <thead>
+                        <tr>
+                            <th><i class="fa-regular fa-user"></i> Employee</th>
+                            <th><i class="fa-regular fa-circle-dollar"></i> Basic</th>
+                            <th><i class="fa-regular fa-circle-plus"></i> Allowance</th>
+                            <th><i class="fa-regular fa-circle-minus"></i> Deduction</th>
+                            <th><i class="fa-regular fa-wallet"></i> Net Pay</th>
+                            <th><i class="fa-regular fa-flag"></i> Status</th>
+                            <th><i class="fa-regular fa-calendar-check"></i> Pay Date</th>
+                            <th class="text-center"><i class="fa-regular fa-gear"></i> Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="payrollTableBody">
+                        <tr>
+                            <td colspan="8">
+                                <div class="empty-state">
+                                    <i class="fa-regular fa-file-lines"></i>
+                                    <h6>No payroll records</h6>
+                                    <p>Select a month and click <strong>Load</strong> to view payroll data.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Messages & Report -->
+        <div id="message" class="mt-3"></div>
+        <div id="accuracyReport" class="accuracy-report"></div>
+    </div>
+
+    <!-- ═══ EDIT MODAL ═══ -->
+    <div class="modal fade" id="editPayrollModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fa-regular fa-pen-to-square" style="color:var(--color-primary);"></i> Edit Payroll</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editPayrollForm">
+                        <input type="hidden" id="editPayrollId" />
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Basic Salary</label>
+                                <input type="number" step="0.01" class="form-control" id="editBasic" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Allowance</label>
+                                <input type="number" step="0.01" class="form-control" id="editAllowance" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Deduction</label>
+                                <input type="number" step="0.01" class="form-control" id="editDeduction" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Status</label>
+                                <select class="form-select" id="editStatus">
+                                    <option value="draft">Draft</option>
+                                    <option value="generated">Generated</option>
+                                    <option value="paid">Paid</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Pay Date</label>
+                                <input type="date" class="form-control" id="editPayDate" />
+                            </div>
+                            <div class="col-12">
+                                <div class="alert alert-info d-flex justify-content-between align-items-center mb-0" style="border-radius:var(--radius-sm);">
+                                    <span><i class="fa-regular fa-calculator"></i> <strong>Net Pay</strong></span>
+                                    <span id="editNetPay" style="font-weight:700;font-size:1.1rem;">0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="savePayrollEdit">
+                        <i class="fa-regular fa-floppy-disk"></i> Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ TOAST CONTAINER ═══ -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+    </script>
+    <script src="../js/api.js">
+    </script>
+    <script>
+        (function() {
+            'use strict';
+
+            // ── Navbar & Logout ──
+            document.addEventListener('DOMContentLoaded', () => {
+                const role = localStorage.getItem('role');
+                if (!role) { window.location.href = 'login.html'; return; }
+
+                const navLinksContainer = document.getElementById('navLinksContainer');
+                const links = [
+                    { href: '../dashboard.html', label: 'Dashboard', icon: 'fa-solid fa-gauge-high' },
+                    { href: 'employees.html', label: 'Employees', icon: 'fa-solid fa-users' },
+                    { href: 'attendance.html', label: 'Attendance', icon: 'fa-solid fa-clipboard-user' },
+                    { href: 'leaves.html', label: 'Leave Approvals', icon: 'fa-solid fa-calendar-check' },
+                    { href: 'payroll.html', label: 'Payroll', icon: 'fa-solid fa-indian-rupee-sign' },
+                    { href: 'announcements.html', label: 'Announcements', icon: 'fa-solid fa-bullhorn' },
+                    { href: '../announcements.html', label: 'Live Feed', icon: 'fa-solid fa-rss' }
+                ];
+                links.forEach(link => {
+                    const a = document.createElement('a');
+                    a.className = 'nav-link-custom';
+                    a.href = link.href;
+                    a.innerHTML = `<i class="${link.icon}"></i> ${link.label}`;
+                    if (link.href === 'payroll.html') a.classList.add('active-link');
+                    navLinksContainer.appendChild(a);
+                });
+
+                // Mobile toggler
+                const navbarToggler = document.getElementById('navbarToggler');
+                const navbarContent = document.getElementById('navbarContent');
+                const togglerIcon = navbarToggler.querySelector('i');
+                navbarToggler.addEventListener('click', () => {
+                    const isShown = navbarContent.classList.toggle('show');
+                    togglerIcon.className = isShown ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+                });
+                navLinksContainer.addEventListener('click', (e) => {
+                    if (e.target.closest('a') && navbarContent.classList.contains('show')) {
+                        navbarContent.classList.remove('show');
+                        togglerIcon.className = 'fa-solid fa-bars';
+                    }
+                });
+                window.addEventListener('scroll', () => {
+                    document.getElementById('mainNavbar').classList.toggle('scrolled', window.scrollY > 10);
+                });
+
+                document.getElementById('logoutBtn').addEventListener('click', async () => {
+                    try { await apiCall('logout', 'POST'); } catch (_) {}
+                    localStorage.removeItem('role');
+                    window.location.href = '../login.html';
+                });
+
+                // ── Payroll logic ──
+                let currentPayrollData = [];
+                let editModal = new bootstrap.Modal(document.getElementById('editPayrollModal'));
+
+                const monthPicker = document.getElementById('payrollMonth');
+                const now = new Date();
+                monthPicker.value = now.toISOString().slice(0, 7);
+
+                document.getElementById('loadPayrollBtn').addEventListener('click', loadPayroll);
+                document.getElementById('generatePayrollBtn').addEventListener('click', generatePayroll);
+                document.getElementById('verifyAccuracyBtn').addEventListener('click', verifyAccuracy);
+
+                document.getElementById('editBasic').addEventListener('input', updateNetPreview);
+                document.getElementById('editAllowance').addEventListener('input', updateNetPreview);
+                document.getElementById('editDeduction').addEventListener('input', updateNetPreview);
+                document.getElementById('savePayrollEdit').addEventListener('click', savePayrollEdit);
+
+                loadPayroll();
+
+                // ── Load ──
+                async function loadPayroll() {
+                    const monthYear = monthPicker.value;
+                    if (!monthYear) { showToast('Please select a month', 'warning'); return; }
+                    const [year, month] = monthYear.split('-');
+                    try {
+                        const data = await apiCall('payroll', 'GET', null, { action: 'list', month, year });
+                        currentPayrollData = data;
+                        renderPayrollTable(data);
+                        document.getElementById('recordCount').textContent = data ? data.length : 0;
+                    } catch (err) {
+                        showToast(err.message, 'danger');
+                    }
+                }
+
+                // ── Render ──
+                function renderPayrollTable(data) {
+                    const tbody = document.getElementById('payrollTableBody');
+                    tbody.innerHTML = '';
+                    if (!data || data.length === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="8">
+                                    <div class="empty-state">
+                                        <i class="fa-regular fa-file-lines"></i>
+                                        <h6>No payroll records</h6>
+                                        <p>No records found for the selected month.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        return;
+                    }
+                    data.forEach((row, idx) => {
+                        const tr = document.createElement('tr');
+                        tr.style.animationDelay = `${(idx % 15) * 0.025}s`;
+
+                        const initial = (row.full_name || row.employee_id || '?').charAt(0).toUpperCase();
+                        const status = row.status || 'draft';
+
+                        tr.innerHTML = `
+                            <td>
+                                <div class="employee-cell">
+                                    <span class="employee-avatar">${initial}</span>
+                                    <div>
+                                        <div class="employee-name">${row.full_name || row.employee_id}</div>
+                                        <span class="employee-id">ID: ${row.employee_id || '—'}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="amount-cell">₹${parseFloat(row.basic || 0).toFixed(2)}</td>
+                            <td class="amount-cell positive">₹${parseFloat(row.allowance || 0).toFixed(2)}</td>
+                            <td class="amount-cell negative">−₹${parseFloat(row.deduction || 0).toFixed(2)}</td>
+                            <td class="amount-cell net">₹${parseFloat(row.net || 0).toFixed(2)}</td>
+                            <td>
+                                <span class="status-badge ${status}">
+                                    <span class="dot"></span>
+                                    ${status}
+                                </span>
+                            </td>
+                            <td class="pay-date-cell">
+                                ${row.pay_date ? new Date(row.pay_date).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '<span class="no-date">—</span>'}
+                            </td>
+                            <td>
+                                <div class="action-group justify-content-center">
+                                    <button class="btn-action edit" onclick="openEditModal(${row.payroll_id || 0})" title="Edit">
+                                        <i class="fa-regular fa-pen-to-square"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+
+                // ── Generate ──
+                async function generatePayroll() {
+                    const monthYear = monthPicker.value;
+                    if (!monthYear) { showToast('Please select a month', 'warning'); return; }
+                    const [year, month] = monthYear.split('-');
+                    if (!confirm(`Generate payroll for ${month}/${year}?`)) return;
+                    try {
+                        await apiCall('payroll', 'POST', { month, year });
+                        showToast('Payroll generated successfully', 'success');
+                        loadPayroll();
+                    } catch (err) {
+                        showToast(err.message, 'danger');
+                    }
+                }
+
+                // ── Open Edit Modal ──
+                window.openEditModal = function(payrollId) {
+                    const record = currentPayrollData.find(r => r.payroll_id == payrollId);
+                    if (!record) { showToast('Record not found', 'danger'); return; }
+                    document.getElementById('editPayrollId').value = payrollId;
+                    document.getElementById('editBasic').value = parseFloat(record.basic || 0);
+                    document.getElementById('editAllowance').value = parseFloat(record.allowance || 0);
+                    document.getElementById('editDeduction').value = parseFloat(record.deduction || 0);
+                    document.getElementById('editStatus').value = record.status || 'draft';
+                    document.getElementById('editPayDate').value = record.pay_date || '';
+                    updateNetPreview();
+                    editModal.show();
+                };
+
+                // ── Net preview ──
+                function updateNetPreview() {
+                    const basic = parseFloat(document.getElementById('editBasic').value) || 0;
+                    const allowance = parseFloat(document.getElementById('editAllowance').value) || 0;
+                    const deduction = parseFloat(document.getElementById('editDeduction').value) || 0;
+                    document.getElementById('editNetPay').textContent = (basic + allowance - deduction).toFixed(2);
+                }
+
+                // ── Save Edit ──
+                async function savePayrollEdit() {
+                    const id = document.getElementById('editPayrollId').value;
+                    const payload = {
+                        basic: parseFloat(document.getElementById('editBasic').value) || 0,
+                        allowance: parseFloat(document.getElementById('editAllowance').value) || 0,
+                        deduction: parseFloat(document.getElementById('editDeduction').value) || 0,
+                        status: document.getElementById('editStatus').value,
+                        pay_date: document.getElementById('editPayDate').value || null
+                    };
+                    try {
+                        await apiCall(`payroll/${id}`, 'PUT', payload);
+                        showToast('Payroll updated successfully', 'success');
+                        editModal.hide();
+                        loadPayroll();
+                    } catch (err) {
+                        showToast(err.message, 'danger');
+                    }
+                }
+
+                // ── Verify Accuracy (FIXED) ──
+                async function verifyAccuracy() {
+                    const monthYear = monthPicker.value;
+                    if (!monthYear) { showToast('Please select a month', 'warning'); return; }
+                    const [year, month] = monthYear.split('-');
+                    const reportDiv = document.getElementById('accuracyReport');
+                    reportDiv.innerHTML =
+                        `<div class="alert alert-info"><i class="fa-solid fa-spinner fa-spin"></i> Checking accuracy…</div>`;
+
+                    try {
+                        const payrollData = await apiCall('payroll', 'GET', null, { action: 'list', month, year });
+                        const startDate = `${year}-${month}-01`;
+                        const endDate = `${year}-${month}-${new Date(year, month, 0).getDate()}`;
+                        const attendanceData = await apiCall('attendance', 'GET', null, { start: startDate, end: endDate });
+
+                        // Group attendance by user_id
+                        const attMap = {};
+                        attendanceData.forEach(rec => {
+                            if (!attMap[rec.user_id]) attMap[rec.user_id] = [];
+                            attMap[rec.user_id].push(rec);
+                        });
+
+                        let issues = [];
+                        let totalChecked = 0;
+
+                        payrollData.forEach(record => {
+                            totalChecked++;
+                            const userAtt = attMap[record.user_id] || [];
+                            const workingDays = getWorkingDays(startDate, endDate);
+                            let presentCount = 0;
+                            workingDays.forEach(d => {
+                                const dayAtt = userAtt.find(a => a.date === d);
+                                if (dayAtt && (dayAtt.status === 'present' || dayAtt.status === 'half-day'))
+                                    presentCount++;
+                            });
+
+                            // --- FIX: Parse all numbers as floats ---
+                            const basic = parseFloat(record.basic) || 0;
+                            const allowance = parseFloat(record.allowance) || 0;
+                            const deduction = parseFloat(record.deduction) || 0;
+                            const actualNet = parseFloat(record.net) || 0;
+                            const expectedNet = basic + allowance - deduction;
+
+                            const recordIssues = [];
+                            if (Math.abs(expectedNet - actualNet) > 0.01) {
+                                recordIssues.push('Net pay mismatch');
+                            }
+                            if (presentCount === 0 && workingDays.length > 0) {
+                                recordIssues.push('No attendance for working days');
+                            }
+                            if (record.status === 'paid' && !record.pay_date) {
+                                recordIssues.push('Paid status but no pay date');
+                            }
+
+                            if (recordIssues.length > 0) {
+                                issues.push({
+                                    employee: record.full_name || record.employee_id,
+                                    issues: recordIssues.join(', '),
+                                    net: actualNet,
+                                    expectedNet: expectedNet,
+                                    presentDays: presentCount,
+                                    totalDays: workingDays.length
+                                });
+                            }
+                        });
+
+                        let html = '';
+                        if (issues.length === 0) {
+                            html =
+                                `<div class="alert alert-success"><i class="fa-regular fa-circle-check"></i> All ${totalChecked} payroll records are accurate. No issues found.</div>`;
+                        } else {
+                            html =
+                                `<div class="alert alert-warning"><i class="fa-regular fa-triangle-exclamation"></i> Found <strong>${issues.length}</strong> record(s) with issues out of ${totalChecked}.</div>`;
+                            html += `
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Employee</th>
+                                                <th>Issues</th>
+                                                <th>Net Pay (Actual)</th>
+                                                <th>Expected Net</th>
+                                                <th>Present Days</th>
+                                                <th>Working Days</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                    `;
+                            issues.forEach(item => {
+                                html += `
+                                    <tr>
+                                        <td><strong>${item.employee}</strong></td>
+                                        <td><span class="badge bg-danger">${item.issues}</span></td>
+                                        <td>₹${item.net.toFixed(2)}</td>
+                                        <td>₹${item.expectedNet.toFixed(2)}</td>
+                                        <td>${item.presentDays}</td>
+                                        <td>${item.totalDays}</td>
+                                    </tr>
+                                `;
+                            });
+                            html += `</tbody></table></div>`;
+                        }
+                        reportDiv.innerHTML = html;
+                        showToast(`Checked ${totalChecked} records, found ${issues.length} issue(s)`, issues.length > 0 ?
+                            'warning' : 'success');
+                    } catch (err) {
+                        reportDiv.innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+                    }
+                }
+
+                // ── Helpers ──
+                function getWorkingDays(startDate, endDate) {
+                    const start = new Date(startDate);
+                    const end = new Date(endDate);
+                    const days = [];
+                    const current = new Date(start);
+                    while (current <= end) {
+                        const dow = current.getDay();
+                        if (dow !== 0 && dow !== 6) {
+                            days.push(current.toISOString().slice(0, 10));
+                        }
+                        current.setDate(current.getDate() + 1);
+                    }
+                    return days;
+                }
+
+                // ── Toast ──
+                function showToast(message, type = 'success') {
+                    const container = document.getElementById('toastContainer');
+                    const toast = document.createElement('div');
+                    toast.className = `toast-custom ${type}`;
+                    const iconMap = {
+                        success: 'fa-regular fa-circle-check',
+                        warning: 'fa-regular fa-triangle-exclamation',
+                        danger: 'fa-regular fa-circle-xmark',
+                        info: 'fa-regular fa-circle-info'
+                    };
+                    toast.innerHTML = `
+                        <span class="toast-icon"><i class="${iconMap[type] || iconMap.info}"></i></span>
+                        <span>${message}</span>
+                        <button class="toast-close" onclick="this.closest('.toast-custom').remove()">&times;</button>
+                    `;
+                    container.appendChild(toast);
+                    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 4500);
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

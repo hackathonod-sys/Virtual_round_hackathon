@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Announcements</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .timeline {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        .announce-card {
+            border-left: 4px solid #0d6efd;
+            transition: 0.2s;
+        }
+        .announce-card:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>📢 Manage Announcements</h2>
+            <a href="../dashboard.html" class="btn btn-secondary">← Dashboard</a>
+        </div>
+
+        <!-- Add / Edit Form -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 id="formTitle">Create New Announcement</h5>
+            </div>
+            <div class="card-body">
+                <form id="announceForm">
+                    <input type="hidden" id="editId">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Content</label>
+                        <textarea class="form-control" id="content" rows="4" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Post</button>
+                    <button type="button" class="btn btn-secondary" id="cancelEditBtn" style="display:none;">Cancel</button>
+                </form>
+                <div id="formMessage" class="mt-2"></div>
+            </div>
+        </div>
+
+        <!-- Existing Announcements List -->
+        <div id="announceList"></div>
+        <div id="message"></div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        let editingId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAnnouncements();
+
+            document.getElementById('announceForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = document.getElementById('editId').value;
+                const title = document.getElementById('title').value;
+                const content = document.getElementById('content').value;
+                try {
+                    if (id) {
+                        // Update
+                        await apiCall(`announcements/${id}`, 'PUT', { title, content });
+                        document.getElementById('formMessage').innerHTML = '<div class="alert alert-success">Updated</div>';
+                    } else {
+                        // Create
+                        await apiCall('announcements', 'POST', { title, content });
+                        document.getElementById('formMessage').innerHTML = '<div class="alert alert-success">Posted</div>';
+                    }
+                    resetForm();
+                    loadAnnouncements();
+                } catch (err) {
+                    document.getElementById('formMessage').innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+                }
+            });
+
+            document.getElementById('cancelEditBtn').addEventListener('click', resetForm);
+        });
+
+        function resetForm() {
+            document.getElementById('announceForm').reset();
+            document.getElementById('editId').value = '';
+            document.getElementById('formTitle').textContent = 'Create New Announcement';
+            document.getElementById('submitBtn').textContent = 'Post';
+            document.getElementById('cancelEditBtn').style.display = 'none';
+            editingId = null;
+            document.getElementById('formMessage').innerHTML = '';
+        }
+
+        function editAnnouncement(id) {
+            // Fetch the announcement and populate form
+            apiCall('announcements').then(data => {
+                const ann = data.find(a => a.id == id);
+                if (ann) {
+                    document.getElementById('editId').value = ann.id;
+                    document.getElementById('title').value = ann.title;
+                    document.getElementById('content').value = ann.content;
+                    document.getElementById('formTitle').textContent = 'Edit Announcement';
+                    document.getElementById('submitBtn').textContent = 'Update';
+                    document.getElementById('cancelEditBtn').style.display = 'inline-block';
+                    editingId = id;
+                    // Scroll to form
+                    document.querySelector('.card').scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        }
+
+        async function deleteAnnouncement(id) {
+            if (!confirm('Delete this announcement?')) return;
+            try {
+                await apiCall(`announcements/${id}`, 'DELETE');
+                loadAnnouncements();
+                document.getElementById('message').innerHTML = '<div class="alert alert-success">Deleted</div>';
+            } catch (err) {
+                document.getElementById('message').innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+            }
+        }
+
+        async function loadAnnouncements() {
+            try {
+                const data = await apiCall('announcements');
+                const container = document.getElementById('announceList');
+                container.innerHTML = '';
+                if (data.length === 0) {
+                    container.innerHTML = '<div class="alert alert-info">No announcements yet.</div>';
+                    return;
+                }
+                data.forEach(a => {
+                    const card = document.createElement('div');
+                    card.className = 'card mb-3 announce-card';
+                    const created = new Date(a.created_at).toLocaleString();
+                    const updated = a.updated_at ? new Date(a.updated_at).toLocaleString() : null;
+                    const isEdited = updated && updated !== created;
+                    card.innerHTML = `
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <h5 class="card-title">${a.title}</h5>
+                                <div>
+                                    <button class="btn btn-sm btn-warning" onclick="editAnnouncement(${a.id})">Edit</button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteAnnouncement(${a.id})">Delete</button>
+                                </div>
+                            </div>
+                            <p class="card-text">${a.content}</p>
+                            <div class="timeline">
+                                <span>Posted: ${created}</span>
+                                ${isEdited ? `<span class="ms-3">Last updated: ${updated}</span>` : ''}
+                            </div>
+                            <small class="text-muted">Posted by ${a.admin_employee_id || 'Admin'}</small>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (err) {
+                document.getElementById('message').innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
